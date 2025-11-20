@@ -80,6 +80,11 @@ body {
     z-index: 1000;
     border-bottom: 1px solid rgba(108, 99, 255, 0.2);
     box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease-in-out;
+}
+
+.header.hidden {
+    transform: translateY(-100%);
 }
 
 .header .container {

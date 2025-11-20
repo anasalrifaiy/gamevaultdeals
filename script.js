@@ -626,6 +626,46 @@ async function init() {
     }
 }
 
+// ===== Mobile Header Auto-Hide =====
+let lastScrollTop = 0;
+let scrollTimeout = null;
+
+function handleHeaderScroll() {
+    const header = document.querySelector('.header');
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+    // Clear any existing timeout
+    if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+    }
+
+    // Don't hide header when at the top of the page
+    if (currentScroll <= 100) {
+        header.classList.remove('hidden');
+        lastScrollTop = currentScroll;
+        return;
+    }
+
+    // Scrolling down - hide header
+    if (currentScroll > lastScrollTop && currentScroll > 100) {
+        header.classList.add('hidden');
+    }
+    // Scrolling up - show header
+    else if (currentScroll < lastScrollTop) {
+        header.classList.remove('hidden');
+    }
+
+    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+}
+
+// Add scroll listener with throttling for better performance
+window.addEventListener('scroll', function() {
+    if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+    }
+    scrollTimeout = setTimeout(handleHeaderScroll, 10);
+}, { passive: true });
+
 // ===== Start the App =====
 // Wait for DOM to be ready
 if (document.readyState === 'loading') {
