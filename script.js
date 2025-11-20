@@ -240,6 +240,29 @@ async function fetchGenresForDeals(deals) {
 }
 
 // ===== Filter & Sort Functions =====
+// Deduplicate games - keep only the best deal per game title
+function deduplicateDeals(deals) {
+    const gameMap = new Map();
+
+    deals.forEach(deal => {
+        const titleKey = deal.title.toLowerCase().trim();
+        const existing = gameMap.get(titleKey);
+
+        if (!existing) {
+            gameMap.set(titleKey, deal);
+        } else {
+            // Keep the deal with the lower sale price
+            // If prices are equal, keep the one with better deal rating
+            if (deal.salePrice < existing.salePrice ||
+                (deal.salePrice === existing.salePrice && deal.dealRating > existing.dealRating)) {
+                gameMap.set(titleKey, deal);
+            }
+        }
+    });
+
+    return Array.from(gameMap.values());
+}
+
 function applyFilters() {
     let filtered = [...state.allDeals];
 
@@ -273,6 +296,9 @@ function applyFilters() {
     if (state.filters.maxPrice < 100) {
         filtered = filtered.filter(deal => deal.salePrice <= state.filters.maxPrice);
     }
+
+    // Deduplicate - show only the best deal per game
+    filtered = deduplicateDeals(filtered);
 
     // Sort
     filtered = sortDeals(filtered, state.filters.sort);
