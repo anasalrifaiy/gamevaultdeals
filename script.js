@@ -16,7 +16,7 @@ const STORE_NAMES = {
     '5': 'GameStop',
     '6': 'Direct2Drive',
     '7': 'GOG',
-    '8': 'Origin (EA)',
+    '8': 'EA App',
     '9': 'Humble Store',
     '10': 'Humble Widgets',
     '11': 'Humble Store',
