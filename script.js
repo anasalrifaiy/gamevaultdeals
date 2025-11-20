@@ -7,26 +7,43 @@ const CONFIG = {
     MAX_FETCH: 300  // Fetch up to 300 deals total
 };
 
-// Store names mapping
+// Store names mapping (comprehensive list of legitimate PC game stores)
 const STORE_NAMES = {
     '1': 'Steam',
     '2': 'GamersGate',
     '3': 'GreenManGaming',
+    '4': 'Amazon',
+    '5': 'GameStop',
+    '6': 'Direct2Drive',
     '7': 'GOG',
-    '8': 'Origin',
+    '8': 'Origin (EA)',
+    '9': 'Humble Store',
+    '10': 'Humble Widgets',
     '11': 'Humble Store',
-    '13': 'Uplay',
-    '15': 'GamersGate',
+    '12': 'Humble Monthly',
+    '13': 'Ubisoft Connect',
+    '14': 'IndieGala',
+    '15': 'Fanatical',
+    '16': 'Gamesrocket',
+    '17': 'Games Republic',
+    '18': 'SilaGames',
+    '19': 'Playfield',
+    '20': 'ImperialGames',
     '21': 'WinGameStore',
-    '23': 'Fanatical',
-    '24': 'Noctre',
+    '22': 'FunStockDigital',
+    '23': 'GameBillet',
+    '24': 'Voidu',
     '25': 'Epic Games',
+    '26': '2Game',
     '27': 'Gamesplanet',
     '28': 'Gamesload',
-    '29': 'Direct2Drive',
-    '30': 'GameBillet',
+    '29': 'Gamivo',
+    '30': 'AllYouPlay',
     '31': 'AllYouPlay',
-    '33': 'DLGamer'
+    '32': 'GamesPlanet FR',
+    '33': 'DLGamer',
+    '34': 'Noctre',
+    '35': 'DreamGame'
 };
 
 // ===== State Management =====
@@ -75,26 +92,48 @@ async function fetchDeals() {
     }
 
     try {
-        // Fetch current deals with discounts only
-        const response = await fetch(
-            `${CONFIG.API_BASE}/deals?pageSize=${CONFIG.MAX_FETCH}&onSale=1`
-        );
+        const allDeals = [];
+        const pageSize = 60; // API max per request
+        const maxPages = Math.ceil(CONFIG.MAX_FETCH / pageSize); // Get 5 pages for 300 deals
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        console.log(`🔄 Fetching up to ${CONFIG.MAX_FETCH} deals from API...`);
+
+        // Fetch multiple pages
+        for (let page = 0; page < maxPages; page++) {
+            const response = await fetch(
+                `${CONFIG.API_BASE}/deals?pageSize=${pageSize}&pageNumber=${page}&onSale=1`
+            );
+
+            if (!response.ok) {
+                console.warn(`Failed to fetch page ${page}: ${response.status}`);
+                break;
+            }
+
+            const deals = await response.json();
+
+            if (deals.length === 0) {
+                console.log(`No more deals after page ${page}`);
+                break;
+            }
+
+            allDeals.push(...deals);
+            console.log(`✅ Fetched page ${page + 1}: ${deals.length} deals (total: ${allDeals.length})`);
+
+            // If we got fewer than requested, there are no more pages
+            if (deals.length < pageSize) {
+                break;
+            }
         }
 
-        const deals = await response.json();
-
         // Filter out deals without discounts and enrich data
-        const enrichedDeals = deals
+        const enrichedDeals = allDeals
             .filter(deal => parseFloat(deal.savings) > 0)
             .map(deal => ({
                 ...deal,
                 dealID: deal.dealID,
                 title: deal.title,
                 storeID: deal.storeID,
-                storeName: STORE_NAMES[deal.storeID] || 'Unknown Store',
+                storeName: STORE_NAMES[deal.storeID] || `Store ${deal.storeID}`,
                 salePrice: parseFloat(deal.salePrice),
                 normalPrice: parseFloat(deal.normalPrice),
                 savings: parseFloat(deal.savings),
