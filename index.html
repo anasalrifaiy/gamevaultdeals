@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameVault Deals - Unlock Legendary Savings on PC Games</title>
+    <meta name="description" content="Find the best discounts on PC games from legitimate platforms like Steam, Epic Games, EA, and more. Filter and sort to discover your next gaming adventure at unbeatable prices.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="5" y="5" width="40" height="40" rx="8" stroke="currentColor" stroke-width="3"/>
+                    <path d="M15 20L25 30L35 20" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="25" cy="25" r="3" fill="currentColor"/>
+                </svg>
+                <div>
+                    <h1>GameVault Deals</h1>
+                    <p class="tagline">Unlock Legendary Savings on PC Games</p>
+                </div>
+            </div>
+            <nav class="nav">
+                <a href="#deals" class="nav-link active">Deals</a>
+                <a href="#about" class="nav-link">About</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h2 class="hero-title">Discover Epic Gaming Deals</h2>
+            <p class="hero-subtitle">From Steam, Epic Games, GOG, and more legitimate platforms</p>
+        </div>
+    </section>
+
+    <!-- Filters Section -->
+    <section class="filters-section">
+        <div class="container">
+            <div class="search-bar">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                    <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search for games..." />
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="storeFilter">
+                        <svg class="filter-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                            <path d="M9 9L15 15M15 9L9 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Store
+                    </label>
+                    <select id="storeFilter">
+                        <option value="all">All Stores</option>
+                        <option value="1">Steam</option>
+                        <option value="25">Epic Games</option>
+                        <option value="7">GOG</option>
+                        <option value="8">Origin (EA)</option>
+                        <option value="11">Humble Store</option>
+                        <option value="15">GamersGate</option>
+                        <option value="3">GreenManGaming</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="discountFilter">
+                        <svg class="filter-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Min Discount
+                    </label>
+                    <select id="discountFilter">
+                        <option value="0">Any Discount</option>
+                        <option value="10">10% or more</option>
+                        <option value="25">25% or more</option>
+                        <option value="50">50% or more</option>
+                        <option value="75">75% or more</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="sortFilter">
+                        <svg class="filter-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 6H21M3 12H15M3 18H9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Sort By
+                    </label>
+                    <select id="sortFilter">
+                        <option value="Deal Rating">Best Deals</option>
+                        <option value="Savings">Highest Discount</option>
+                        <option value="Price">Lowest Price</option>
+                        <option value="Recent">Most Recent</option>
+                        <option value="Title">Alphabetical</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="priceFilter">
+                        <svg class="filter-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2V22M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Max Price
+                    </label>
+                    <select id="priceFilter">
+                        <option value="100">Any Price</option>
+                        <option value="5">Under $5</option>
+                        <option value="10">Under $10</option>
+                        <option value="20">Under $20</option>
+                        <option value="30">Under $30</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="active-filters" id="activeFilters"></div>
+        </div>
+    </section>
+
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Loading amazing deals...</p>
+    </div>
+
+    <!-- Games Grid -->
+    <section class="games-section">
+        <div class="container">
+            <div class="games-header">
+                <h2>Current Deals</h2>
+                <p id="resultCount" class="result-count">Loading deals...</p>
+            </div>
+            <div class="games-grid" id="gamesGrid">
+                <!-- Games will be dynamically loaded here -->
+            </div>
+            <div class="no-results" id="noResults" style="display: none;">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="4"/>
+                    <path d="M35 40L35 40.01M65 40L65 40.01M35 65Q50 55 65 65" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+                <h3>No Deals Found</h3>
+                <p>Try adjusting your filters to discover more amazing deals!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="container">
+            <h2>About GameVault Deals</h2>
+            <div class="about-content">
+                <div class="about-card">
+                    <div class="about-icon">🎮</div>
+                    <h3>Legitimate Platforms Only</h3>
+                    <p>We only show deals from verified, legal gaming platforms like Steam, Epic Games, GOG, EA Origin, and other trusted stores.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">💰</div>
+                    <h3>Real-Time Deals</h3>
+                    <p>Our platform aggregates current discounts from multiple stores, so you always see the latest and greatest savings.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">🔍</div>
+                    <h3>Easy Discovery</h3>
+                    <p>Filter by discount percentage, price, and store. Sort by best deals or lowest price to find exactly what you're looking for.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>GameVault Deals</h3>
+                    <p>Unlock Legendary Savings on PC Games</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal Platforms</h4>
+                    <ul>
+                        <li>Steam</li>
+                        <li>Epic Games</li>
+                        <li>GOG</li>
+                        <li>EA Origin</li>
+                        <li>Humble Store</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>About</h4>
+                    <p>We help gamers find legitimate deals from trusted stores. All prices and discounts are provided by official retailers.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GameVault Deals. All deals sourced from legitimate gaming platforms.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
