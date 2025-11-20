@@ -47,17 +47,62 @@ const STORE_NAMES = {
 };
 
 // ===== State Management =====
+const STORAGE_KEY = 'gamevault_filters';
+
+// Load saved filters from localStorage
+function loadSavedFilters() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            return JSON.parse(saved);
+        }
+    } catch (error) {
+        // Ignore localStorage errors
+    }
+    return null;
+}
+
+// Save filters to localStorage
+function saveFilters(filters) {
+    try {
+        const toSave = {
+            store: filters.store,
+            genre: filters.genre,
+            discount: filters.discount,
+            maxPrice: filters.maxPrice,
+            sort: filters.sort
+            // Intentionally not saving 'search' as it's too specific
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    } catch (error) {
+        // Ignore localStorage errors (privacy mode, quota exceeded, etc.)
+    }
+}
+
+// Restore saved filters to UI elements
+function restoreSavedFiltersToUI() {
+    if (savedFilters) {
+        if (savedFilters.store) elements.storeFilter.value = savedFilters.store;
+        if (savedFilters.genre) elements.genreFilter.value = savedFilters.genre;
+        if (savedFilters.discount !== undefined) elements.discountFilter.value = String(savedFilters.discount);
+        if (savedFilters.maxPrice !== undefined) elements.priceFilter.value = String(savedFilters.maxPrice);
+        if (savedFilters.sort) elements.sortFilter.value = savedFilters.sort;
+    }
+}
+
+// Initialize state with saved filters or defaults
+const savedFilters = loadSavedFilters();
 let state = {
     allDeals: [],
     filteredDeals: [],
     displayedCount: CONFIG.INITIAL_LOAD,  // Track how many to show
     filters: {
         search: '',
-        store: 'all',
-        genre: 'all',
-        discount: 0,
-        maxPrice: 100,
-        sort: 'Deal Rating'
+        store: savedFilters?.store || 'all',
+        genre: savedFilters?.genre || 'all',
+        discount: savedFilters?.discount || 0,
+        maxPrice: savedFilters?.maxPrice || 100,
+        sort: savedFilters?.sort || 'Deal Rating'
     },
     isLoading: false,
     cache: {
@@ -512,6 +557,9 @@ function updateFiltersAndRender() {
     const filtered = applyFilters();
     renderGames(filtered);
     updateActiveFilters();
+
+    // Save filter preferences to localStorage
+    saveFilters(state.filters);
 }
 
 // ===== Load More Function =====
@@ -617,6 +665,9 @@ async function init() {
 
         // Update genre filter (populated by keyword detection)
         updateGenreFilter();
+
+        // Restore saved filter values to UI elements
+        restoreSavedFiltersToUI();
 
         // Apply initial filters and render
         updateFiltersAndRender();
