@@ -89,7 +89,6 @@ async function fetchDeals() {
     if (state.cache.data && state.cache.timestamp) {
         const cacheAge = Date.now() - state.cache.timestamp;
         if (cacheAge < CONFIG.CACHE_DURATION) {
-            console.log('Using cached data');
             return state.cache.data;
         }
     }
@@ -99,8 +98,6 @@ async function fetchDeals() {
         const pageSize = 60; // API max per request
         const maxPages = Math.ceil(CONFIG.MAX_FETCH / pageSize); // Get 5 pages for 300 deals
 
-        console.log(`🔄 Fetching up to ${CONFIG.MAX_FETCH} deals from API...`);
-
         // Fetch multiple pages
         for (let page = 0; page < maxPages; page++) {
             const response = await fetch(
@@ -108,19 +105,16 @@ async function fetchDeals() {
             );
 
             if (!response.ok) {
-                console.warn(`Failed to fetch page ${page}: ${response.status}`);
                 break;
             }
 
             const deals = await response.json();
 
             if (deals.length === 0) {
-                console.log(`No more deals after page ${page}`);
                 break;
             }
 
             allDeals.push(...deals);
-            console.log(`✅ Fetched page ${page + 1}: ${deals.length} deals (total: ${allDeals.length})`);
 
             // If we got fewer than requested, there are no more pages
             if (deals.length < pageSize) {
@@ -156,7 +150,6 @@ async function fetchDeals() {
 
         return enrichedDeals;
     } catch (error) {
-        console.error('Error fetching deals:', error);
         throw error;
     }
 }
@@ -179,8 +172,6 @@ const GENRE_KEYWORDS = {
 };
 
 async function fetchGenresForDeals(deals) {
-    console.log('🎮 Detecting genres for games...');
-
     // Apply keyword-based genre detection for all games
     deals.forEach(deal => {
         const titleLower = deal.title.toLowerCase();
@@ -198,10 +189,6 @@ async function fetchGenresForDeals(deals) {
             deal.genres = detectedGenres;
         }
     });
-
-    // Count how many games have genres
-    const gamesWithGenres = deals.filter(d => d.genres && d.genres.length > 0).length;
-    console.log(`✅ Genre detection complete: ${gamesWithGenres}/${deals.length} games categorized`);
 
     // Update the genre filter immediately
     updateGenreFilter();
@@ -596,13 +583,7 @@ async function init() {
         // Setup event listeners
         setupEventListeners();
 
-        console.log(`✅ Loaded ${deals.length} deals from legitimate gaming platforms`);
-
-        // Log available stores for debugging
-        const stores = [...new Set(deals.map(d => d.storeID))];
-        console.log(`📊 Available stores:`, stores.map(id => `${STORE_NAMES[id] || 'Unknown'} (${id})`));
     } catch (error) {
-        console.error('Failed to initialize app:', error);
         elements.resultCount.textContent = 'Failed to load deals. Please refresh the page.';
         elements.gamesGrid.innerHTML = `
             <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
