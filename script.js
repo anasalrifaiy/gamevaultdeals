@@ -54,6 +54,7 @@ let state = {
     filters: {
         search: '',
         store: 'all',
+        genre: 'all',
         discount: 0,
         maxPrice: 100,
         sort: 'Deal Rating'
@@ -62,7 +63,8 @@ let state = {
     cache: {
         data: null,
         timestamp: null
-    }
+    },
+    genreCache: {} // Cache for Steam API genre lookups
 };
 
 // ===== DOM Elements =====
@@ -73,6 +75,7 @@ const elements = {
     resultCount: document.getElementById('resultCount'),
     searchInput: document.getElementById('searchInput'),
     storeFilter: document.getElementById('storeFilter'),
+    genreFilter: document.getElementById('genreFilter'),
     discountFilter: document.getElementById('discountFilter'),
     sortFilter: document.getElementById('sortFilter'),
     priceFilter: document.getElementById('priceFilter'),
@@ -139,8 +142,13 @@ async function fetchDeals() {
                 savings: parseFloat(deal.savings),
                 dealRating: parseFloat(deal.dealRating) || 0,
                 thumb: deal.thumb,
-                savingsAmount: parseFloat(deal.normalPrice) - parseFloat(deal.salePrice)
+                savingsAmount: parseFloat(deal.normalPrice) - parseFloat(deal.salePrice),
+                steamAppID: deal.steamAppID || null,
+                genres: [] // Will be populated by fetchGenres
             }));
+
+        // Fetch genres for Steam games in background
+        fetchGenresForDeals(enrichedDeals);
 
         // Cache the results
         state.cache.data = enrichedDeals;
@@ -151,6 +159,63 @@ async function fetchDeals() {
         console.error('Error fetching deals:', error);
         throw error;
     }
+}
+
+// ===== Genre Detection with Steam API =====
+async function fetchGenresForDeals(deals) {
+    console.log('🎮 Fetching genre data for Steam games...');
+
+    const steamDeals = deals.filter(deal => deal.steamAppID);
+    let processedCount = 0;
+
+    // Process in smaller batches to avoid overwhelming the browser
+    const batchSize = 10;
+
+    for (let i = 0; i < steamDeals.length; i += batchSize) {
+        const batch = steamDeals.slice(i, i + batchSize);
+
+        await Promise.all(batch.map(async (deal) => {
+            // Check cache first
+            if (state.genreCache[deal.steamAppID]) {
+                deal.genres = state.genreCache[deal.steamAppID];
+                return;
+            }
+
+            try {
+                // Fetch from Steam API
+                const response = await fetch(
+                    `https://store.steampowered.com/api/appdetails?appids=${deal.steamAppID}`
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const appData = data[deal.steamAppID];
+
+                    if (appData && appData.success && appData.data && appData.data.genres) {
+                        const genres = appData.data.genres.map(g => g.description);
+                        deal.genres = genres;
+                        state.genreCache[deal.steamAppID] = genres; // Cache it
+                    }
+                }
+            } catch (error) {
+                // Silently fail for individual games
+                console.warn(`Failed to fetch genre for ${deal.title}`);
+            }
+
+            processedCount++;
+        }));
+
+        // Update genre filter after each batch
+        if (i % 30 === 0 || i + batchSize >= steamDeals.length) {
+            updateGenreFilter();
+            console.log(`📊 Processed ${processedCount}/${steamDeals.length} Steam games for genres`);
+        }
+
+        // Small delay between batches to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    console.log(`✅ Genre detection complete: ${processedCount} Steam games processed`);
 }
 
 // ===== Filter & Sort Functions =====
@@ -168,6 +233,14 @@ function applyFilters() {
     // Store filter - ensure both values are strings for comparison
     if (state.filters.store !== 'all') {
         filtered = filtered.filter(deal => String(deal.storeID) === String(state.filters.store));
+    }
+
+    // Genre filter
+    if (state.filters.genre !== 'all') {
+        filtered = filtered.filter(deal =>
+            deal.genres && deal.genres.length > 0 &&
+            deal.genres.includes(state.filters.genre)
+        );
     }
 
     // Discount filter
@@ -216,6 +289,49 @@ function updateStoreFilter() {
     // Restore selection if still valid
     if (currentValue !== 'all' && storeCounts[currentValue]) {
         elements.storeFilter.value = currentValue;
+    }
+}
+
+// ===== Dynamic Genre Filter =====
+function updateGenreFilter() {
+    // Count deals per genre
+    const genreCounts = {};
+    state.allDeals.forEach(deal => {
+        if (deal.genres && deal.genres.length > 0) {
+            deal.genres.forEach(genre => {
+                genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+            });
+        }
+    });
+
+    // Get currently selected value
+    const currentValue = elements.genreFilter.value;
+
+    // Rebuild dropdown with only genres that have deals
+    let options = '<option value="all">All Genres</option>';
+
+    // Sort genres by deal count (descending)
+    const sortedGenres = Object.entries(genreCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 20); // Limit to top 20 genres to keep dropdown manageable
+
+    sortedGenres.forEach(([genre, count]) => {
+        options += `<option value="${genre}">${genre} (${count})</option>`;
+    });
+
+    // Add placeholder if genres are still loading
+    const totalDeals = state.allDeals.length;
+    const dealsWithGenres = state.allDeals.filter(d => d.genres && d.genres.length > 0).length;
+
+    if (dealsWithGenres < totalDeals / 2 && sortedGenres.length > 0) {
+        options += `<option disabled>— Loading more genres... —</option>`;
+    }
+
+    elements.genreFilter.innerHTML = options;
+
+    // Restore selection if still valid
+    if (currentValue !== 'all' && genreCounts[currentValue]) {
+        elements.genreFilter.value = currentValue;
     }
 }
 
@@ -337,6 +453,13 @@ function updateActiveFilters() {
         });
     }
 
+    if (state.filters.genre !== 'all') {
+        tags.push({
+            label: `Genre: ${state.filters.genre}`,
+            key: 'genre'
+        });
+    }
+
     if (state.filters.discount > 0) {
         tags.push({
             label: `Min ${state.filters.discount}% discount`,
@@ -373,6 +496,10 @@ function removeFilter(filterKey) {
         case 'store':
             state.filters.store = 'all';
             elements.storeFilter.value = 'all';
+            break;
+        case 'genre':
+            state.filters.genre = 'all';
+            elements.genreFilter.value = 'all';
             break;
         case 'discount':
             state.filters.discount = 0;
@@ -431,6 +558,12 @@ function setupEventListeners() {
         updateFiltersAndRender();
     });
 
+    // Genre filter
+    elements.genreFilter.addEventListener('change', (e) => {
+        state.filters.genre = e.target.value;
+        updateFiltersAndRender();
+    });
+
     // Discount filter
     elements.discountFilter.addEventListener('change', (e) => {
         state.filters.discount = parseInt(e.target.value);
@@ -472,6 +605,9 @@ async function init() {
 
         // Update store filter with available stores
         updateStoreFilter();
+
+        // Update genre filter (will be populated as Steam API data comes in)
+        updateGenreFilter();
 
         // Apply initial filters and render
         updateFiltersAndRender();
