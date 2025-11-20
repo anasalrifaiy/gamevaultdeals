@@ -126,9 +126,9 @@ function applyFilters() {
         );
     }
 
-    // Store filter
+    // Store filter - ensure both values are strings for comparison
     if (state.filters.store !== 'all') {
-        filtered = filtered.filter(deal => deal.storeID === state.filters.store);
+        filtered = filtered.filter(deal => String(deal.storeID) === String(state.filters.store));
     }
 
     // Discount filter
@@ -146,6 +146,38 @@ function applyFilters() {
 
     state.filteredDeals = filtered;
     return filtered;
+}
+
+// ===== Dynamic Store Filter =====
+function updateStoreFilter() {
+    // Count deals per store
+    const storeCounts = {};
+    state.allDeals.forEach(deal => {
+        const storeId = String(deal.storeID);
+        storeCounts[storeId] = (storeCounts[storeId] || 0) + 1;
+    });
+
+    // Get currently selected value
+    const currentValue = elements.storeFilter.value;
+
+    // Rebuild dropdown with only stores that have deals
+    let options = '<option value="all">All Stores</option>';
+
+    // Sort stores by deal count (descending)
+    const sortedStores = Object.entries(storeCounts)
+        .sort((a, b) => b[1] - a[1]);
+
+    sortedStores.forEach(([storeId, count]) => {
+        const storeName = STORE_NAMES[storeId] || 'Unknown Store';
+        options += `<option value="${storeId}">${storeName} (${count})</option>`;
+    });
+
+    elements.storeFilter.innerHTML = options;
+
+    // Restore selection if still valid
+    if (currentValue !== 'all' && storeCounts[currentValue]) {
+        elements.storeFilter.value = currentValue;
+    }
 }
 
 function sortDeals(deals, sortBy) {
@@ -399,6 +431,9 @@ async function init() {
         const deals = await fetchDeals();
         state.allDeals = deals;
 
+        // Update store filter with available stores
+        updateStoreFilter();
+
         // Apply initial filters and render
         updateFiltersAndRender();
 
@@ -406,6 +441,10 @@ async function init() {
         setupEventListeners();
 
         console.log(`✅ Loaded ${deals.length} deals from legitimate gaming platforms`);
+
+        // Log available stores for debugging
+        const stores = [...new Set(deals.map(d => d.storeID))];
+        console.log(`📊 Available stores:`, stores.map(id => `${STORE_NAMES[id] || 'Unknown'} (${id})`));
     } catch (error) {
         console.error('Failed to initialize app:', error);
         elements.resultCount.textContent = 'Failed to load deals. Please refresh the page.';
