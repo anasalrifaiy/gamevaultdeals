@@ -2,7 +2,9 @@
 const CONFIG = {
     API_BASE: 'https://www.cheapshark.com/api/1.0',
     CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
-    ITEMS_PER_PAGE: 60
+    INITIAL_LOAD: 60,  // Show 60 initially
+    LOAD_MORE_COUNT: 60,  // Load 60 more each time
+    MAX_FETCH: 300  // Fetch up to 300 deals total
 };
 
 // Store names mapping
@@ -31,6 +33,7 @@ const STORE_NAMES = {
 let state = {
     allDeals: [],
     filteredDeals: [],
+    displayedCount: CONFIG.INITIAL_LOAD,  // Track how many to show
     filters: {
         search: '',
         store: 'all',
@@ -56,7 +59,8 @@ const elements = {
     discountFilter: document.getElementById('discountFilter'),
     sortFilter: document.getElementById('sortFilter'),
     priceFilter: document.getElementById('priceFilter'),
-    activeFilters: document.getElementById('activeFilters')
+    activeFilters: document.getElementById('activeFilters'),
+    loadMoreBtn: document.getElementById('loadMoreBtn')
 };
 
 // ===== API Functions =====
@@ -73,7 +77,7 @@ async function fetchDeals() {
     try {
         // Fetch current deals with discounts only
         const response = await fetch(
-            `${CONFIG.API_BASE}/deals?pageSize=${CONFIG.ITEMS_PER_PAGE}&onSale=1`
+            `${CONFIG.API_BASE}/deals?pageSize=${CONFIG.MAX_FETCH}&onSale=1`
         );
 
         if (!response.ok) {
@@ -169,14 +173,29 @@ function renderGames(deals) {
         elements.gamesGrid.style.display = 'none';
         elements.noResults.style.display = 'block';
         elements.resultCount.textContent = 'No deals found';
+        elements.loadMoreBtn.style.display = 'none';
         return;
     }
 
     elements.gamesGrid.style.display = 'grid';
     elements.noResults.style.display = 'none';
-    elements.resultCount.textContent = `Showing ${deals.length} amazing deal${deals.length !== 1 ? 's' : ''}`;
 
-    elements.gamesGrid.innerHTML = deals.map(deal => createGameCard(deal)).join('');
+    // Only show up to displayedCount items
+    const dealsToShow = deals.slice(0, state.displayedCount);
+    const totalDeals = deals.length;
+
+    elements.resultCount.textContent = `Showing ${dealsToShow.length} of ${totalDeals} amazing deal${totalDeals !== 1 ? 's' : ''}`;
+
+    elements.gamesGrid.innerHTML = dealsToShow.map(deal => createGameCard(deal)).join('');
+
+    // Show/hide load more button
+    if (dealsToShow.length < totalDeals) {
+        elements.loadMoreBtn.style.display = 'block';
+        const remaining = totalDeals - dealsToShow.length;
+        elements.loadMoreBtn.textContent = `Load More Deals (${remaining} remaining)`;
+    } else {
+        elements.loadMoreBtn.style.display = 'none';
+    }
 }
 
 function createGameCard(deal) {
@@ -298,9 +317,17 @@ function removeFilter(filterKey) {
 }
 
 function updateFiltersAndRender() {
+    // Reset displayed count when filters change
+    state.displayedCount = CONFIG.INITIAL_LOAD;
     const filtered = applyFilters();
     renderGames(filtered);
     updateActiveFilters();
+}
+
+// ===== Load More Function =====
+function loadMoreDeals() {
+    state.displayedCount += CONFIG.LOAD_MORE_COUNT;
+    renderGames(state.filteredDeals);
 }
 
 // ===== Loading State =====
@@ -415,3 +442,4 @@ if (document.readyState === 'loading') {
 // ===== Expose functions to global scope for onclick handlers =====
 window.openDeal = openDeal;
 window.removeFilter = removeFilter;
+window.loadMoreDeals = loadMoreDeals;

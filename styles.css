@@ -529,6 +529,69 @@ body {
     color: var(--text-primary);
 }
 
+/* ===== Load More Button ===== */
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+}
+
+.load-more-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xl);
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.load-more-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.load-more-btn:hover::before {
+    left: 100%;
+}
+
+.load-more-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl), var(--shadow-glow);
+}
+
+.load-more-btn:active {
+    transform: translateY(0);
+}
+
+.load-more-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--text-primary);
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+}
+
 /* ===== About Section ===== */
 .about-section {
     padding: var(--spacing-xl) 0;
