@@ -240,12 +240,27 @@ async function fetchGenresForDeals(deals) {
 }
 
 // ===== Filter & Sort Functions =====
+// Normalize title for better deduplication matching
+function normalizeTitle(title) {
+    return title
+        .toLowerCase()
+        .trim()
+        // Replace all types of dashes with standard dash
+        .replace(/[–—―]/g, '-')
+        // Remove trademark symbols and special characters
+        .replace(/[™®©]/g, '')
+        // Normalize multiple spaces to single space
+        .replace(/\s+/g, ' ')
+        // Remove leading/trailing punctuation and spaces
+        .replace(/^[\s\-:]+|[\s\-:]+$/g, '');
+}
+
 // Deduplicate games - keep only the best deal per game title
 function deduplicateDeals(deals) {
     const gameMap = new Map();
 
     deals.forEach(deal => {
-        const titleKey = deal.title.toLowerCase().trim();
+        const titleKey = normalizeTitle(deal.title);
         const existing = gameMap.get(titleKey);
 
         if (!existing) {
