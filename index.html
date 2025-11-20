@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GameVault Deals - Unlock Legendary Savings on PC Games</title>
     <meta name="description" content="Find the best discounts on PC games from legitimate platforms like Steam, Epic Games, EA, and more. Filter and sort to discover your next gaming adventure at unbeatable prices.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gamevaultdeals.com/">
+    <meta property="og:title" content="GameVault Deals - Unlock Legendary Savings on PC Games">
+    <meta property="og:description" content="Find the best discounts on PC games from legitimate platforms like Steam, Epic Games, EA, and more. Filter and sort to discover your next gaming adventure at unbeatable prices.">
+    <meta property="og:image" content="https://gamevaultdeals.com/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://gamevaultdeals.com/">
+    <meta property="twitter:title" content="GameVault Deals - Unlock Legendary Savings on PC Games">
+    <meta property="twitter:description" content="Find the best discounts on PC games from legitimate platforms like Steam, Epic Games, EA, and more.">
+    <meta property="twitter:image" content="https://gamevaultdeals.com/og-image.png">
+
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -126,6 +141,15 @@
                 </div>
             </div>
 
+            <div class="filter-actions">
+                <button id="clearFiltersBtn" class="clear-filters-btn" onclick="clearAllFilters()" style="display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Clear All Filters
+                </button>
+            </div>
+
             <div class="active-filters" id="activeFilters"></div>
         </div>
     </section>
@@ -161,7 +185,7 @@
                     <svg class="load-more-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 5V19M5 12L12 19L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    Load More Deals
+                    <span class="btn-text">Load More Deals</span>
                 </button>
             </div>
         </div>
@@ -219,6 +243,13 @@
             </div>
         </div>
     </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top" aria-label="Back to top">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 19V5M5 12L12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </button>
 
     <script src="script.js"></script>
 </body>

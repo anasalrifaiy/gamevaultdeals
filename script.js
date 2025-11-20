@@ -442,11 +442,15 @@ function updateActiveFilters() {
         });
     }
 
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
     if (tags.length === 0) {
         elements.activeFilters.innerHTML = '';
+        clearFiltersBtn.style.display = 'none';
         return;
     }
 
+    clearFiltersBtn.style.display = 'inline-flex';
     elements.activeFilters.innerHTML = tags.map(tag => `
         <div class="filter-tag">
             ${tag.label}
@@ -482,6 +486,26 @@ function removeFilter(filterKey) {
     updateFiltersAndRender();
 }
 
+function clearAllFilters() {
+    // Reset all filters to default
+    state.filters.search = '';
+    state.filters.store = 'all';
+    state.filters.genre = 'all';
+    state.filters.discount = 0;
+    state.filters.maxPrice = 100;
+    state.filters.sort = 'Deal Rating';
+
+    // Reset all UI elements
+    elements.searchInput.value = '';
+    elements.storeFilter.value = 'all';
+    elements.genreFilter.value = 'all';
+    elements.discountFilter.value = '0';
+    elements.priceFilter.value = '100';
+    elements.sortFilter.value = 'Deal Rating';
+
+    updateFiltersAndRender();
+}
+
 function updateFiltersAndRender() {
     // Reset displayed count when filters change
     state.displayedCount = CONFIG.INITIAL_LOAD;
@@ -492,8 +516,25 @@ function updateFiltersAndRender() {
 
 // ===== Load More Function =====
 function loadMoreDeals() {
-    state.displayedCount += CONFIG.LOAD_MORE_COUNT;
-    renderGames(state.filteredDeals);
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const btnText = loadMoreBtn.querySelector('.btn-text');
+    const originalText = 'Load More Deals';
+
+    // Disable button and show loading state
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.classList.add('loading');
+    btnText.textContent = 'Loading...';
+
+    // Simulate loading for better UX (even though rendering is instant)
+    setTimeout(() => {
+        state.displayedCount += CONFIG.LOAD_MORE_COUNT;
+        renderGames(state.filteredDeals);
+
+        // Reset button state
+        loadMoreBtn.disabled = false;
+        loadMoreBtn.classList.remove('loading');
+        btnText.textContent = originalText;
+    }, 300);
 }
 
 // ===== Loading State =====
@@ -647,6 +688,30 @@ window.addEventListener('scroll', function() {
     scrollTimeout = setTimeout(handleHeaderScroll, 10);
 }, { passive: true });
 
+// ===== Back to Top Button =====
+const backToTopButton = document.getElementById('backToTop');
+
+function handleBackToTopButton() {
+    const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (scrollPosition > 500) {
+        backToTopButton.classList.add('visible');
+    } else {
+        backToTopButton.classList.remove('visible');
+    }
+}
+
+// Scroll to top smoothly when button is clicked
+backToTopButton.addEventListener('click', function() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+});
+
+// Show/hide button on scroll
+window.addEventListener('scroll', handleBackToTopButton, { passive: true });
+
 // ===== Start the App =====
 // Wait for DOM to be ready
 if (document.readyState === 'loading') {
@@ -658,4 +723,5 @@ if (document.readyState === 'loading') {
 // ===== Expose functions to global scope for onclick handlers =====
 window.openDeal = openDeal;
 window.removeFilter = removeFilter;
+window.clearAllFilters = clearAllFilters;
 window.loadMoreDeals = loadMoreDeals;
