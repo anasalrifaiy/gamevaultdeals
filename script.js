@@ -392,7 +392,10 @@ function renderGames(deals) {
     if (dealsToShow.length < totalDeals) {
         elements.loadMoreBtn.style.display = 'block';
         const remaining = totalDeals - dealsToShow.length;
-        elements.loadMoreBtn.textContent = `Load More Deals (${remaining} remaining)`;
+        const btnText = elements.loadMoreBtn.querySelector('.btn-text');
+        if (btnText) {
+            btnText.textContent = `Load More Deals (${remaining} remaining)`;
+        }
     } else {
         elements.loadMoreBtn.style.display = 'none';
     }
