@@ -792,7 +792,8 @@ function showFreeGames() {
     // Find all free games (salePrice = 0)
     const freeGames = state.allDeals.filter(deal => parseFloat(deal.salePrice) === 0);
 
-    if (freeGames.length === 0) return;
+    // Only show section if we have at least 3 free games (looks better in grid)
+    if (freeGames.length < 3) return;
 
     const freeGamesSection = document.getElementById('freeGames');
     const freeGamesGrid = document.getElementById('freeGamesGrid');
@@ -829,8 +830,9 @@ function showFreeGames() {
 
 function showDealOfTheDay() {
     // Find the deal with the highest discount percentage (75%+) and best rating
+    // Exclude free games (they have their own section)
     const topDeals = state.allDeals
-        .filter(deal => deal.savings >= 75)
+        .filter(deal => parseFloat(deal.salePrice) > 0 && deal.savings >= 75)
         .sort((a, b) => {
             // Sort by savings first, then by deal rating
             if (b.savings !== a.savings) {
@@ -840,8 +842,10 @@ function showDealOfTheDay() {
         });
 
     if (topDeals.length === 0) {
-        // If no 75%+ deals, just get the highest discount
-        topDeals.push(...state.allDeals.sort((a, b) => b.savings - a.savings));
+        // If no 75%+ deals, just get the highest discount (excluding free games)
+        topDeals.push(...state.allDeals
+            .filter(deal => parseFloat(deal.salePrice) > 0)
+            .sort((a, b) => b.savings - a.savings));
     }
 
     const dealOfDay = topDeals[0];
