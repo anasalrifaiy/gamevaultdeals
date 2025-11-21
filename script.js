@@ -249,6 +249,14 @@ function normalizeTitle(title) {
         .replace(/[–—―]/g, '-')
         // Remove trademark symbols and special characters
         .replace(/[™®©]/g, '')
+        // Remove edition-specific terms to group different editions together
+        .replace(/\b(deluxe|digital|standard|premium|ultimate|definitive|complete|goty|game of the year|collector's?|special|limited|enhanced|remastered|anniversary|gold|platinum|legendary|royal)\b/gi, '')
+        // Remove "edition" word
+        .replace(/\bedition\b/gi, '')
+        // Remove year patterns like (2024), [2024], 2024
+        .replace(/[\(\[]?\b20\d{2}\b[\)\]]?/g, '')
+        // Remove version numbers like v1.0, 1.0, etc
+        .replace(/\bv?\d+\.\d+\b/gi, '')
         // Normalize multiple spaces to single space
         .replace(/\s+/g, ' ')
         // Remove leading/trailing punctuation and spaces
