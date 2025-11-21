@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6C63FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5349E8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="195" fill="url(#grad)"/>
+
+  <!-- Game controller inspired icon -->
+  <rect x="80" y="80" width="240" height="240" rx="48" stroke="white" stroke-width="20" fill="none"/>
+  <path d="M120 160L200 240L280 160" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="200" cy="200" r="20" fill="white"/>
+
+  <!-- Discount tag accent -->
+  <path d="M280 100 L340 100 L340 160 L310 130 Z" fill="#FF6584"/>
+  <circle cx="312" cy="120" r="8" fill="white"/>
+</svg>
