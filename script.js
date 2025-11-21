@@ -200,38 +200,134 @@ async function fetchDeals() {
 }
 
 // ===== Genre Detection =====
-// Genre keywords for title-based detection
+// Comprehensive genre keywords for title-based detection
 const GENRE_KEYWORDS = {
-    'Action': ['action', 'shooter', 'fps', 'combat', 'fighting', 'beat em up', 'hack and slash'],
-    'RPG': ['rpg', 'role-playing', 'jrpg', 'crpg', 'dungeon crawler'],
-    'Strategy': ['strategy', 'tactics', 'rts', 'turn-based', '4x', 'grand strategy', 'tower defense'],
-    'Simulation': ['simulator', 'simulation', 'tycoon', 'management', 'builder'],
-    'Sports': ['football', 'soccer', 'basketball', 'nba', 'fifa', 'nhl', 'racing', 'rally', 'motorsport'],
-    'Adventure': ['adventure', 'point and click', 'narrative', 'story-rich'],
-    'Puzzle': ['puzzle', 'match-3', 'brain', 'logic'],
-    'Horror': ['horror', 'survival horror', 'zombie', 'scary'],
-    'Indie': ['indie'],
-    'Casual': ['casual', 'relaxing', 'chill'],
-    'Platformer': ['platformer', 'platform', 'metroidvania'],
-    'Racing': ['racing', 'rally', 'kart', 'drift', 'f1', 'nascar']
+    'Action': [
+        'action', 'shooter', 'fps', 'tps', 'combat', 'fighting', 'beat em up', 'brawler',
+        'hack and slash', 'slasher', 'gunplay', 'bullet hell', 'shmup', 'run and gun',
+        'call of duty', 'battlefield', 'doom', 'halo', 'gears of war', 'mortal kombat',
+        'street fighter', 'tekken', 'ninja gaiden', 'devil may cry', 'bayonetta'
+    ],
+    'RPG': [
+        'rpg', 'role-playing', 'jrpg', 'crpg', 'arpg', 'mmorpg', 'dungeon crawler',
+        'loot', 'leveling', 'character build', 'witcher', 'elder scrolls', 'skyrim',
+        'fallout', 'final fantasy', 'dragon quest', 'persona', 'tales of', 'elden ring',
+        'dark souls', 'bloodborne', 'mass effect', 'baldur', 'divinity', 'pathfinder'
+    ],
+    'Strategy': [
+        'strategy', 'tactics', 'rts', 'turn-based', '4x', 'grand strategy', 'tower defense',
+        'td', 'real-time strategy', 'tactical rpg', 'wargame', 'civilization', 'total war',
+        'starcraft', 'age of empires', 'company of heroes', 'xcom', 'fire emblem',
+        'advance wars', 'heroes of might', 'crusader kings', 'europa universalis'
+    ],
+    'Simulation': [
+        'simulator', 'simulation', 'sim', 'tycoon', 'management', 'builder', 'city builder',
+        'farming', 'flight sim', 'truck', 'bus', 'train', 'euro truck', 'farming simulator',
+        'cities skylines', 'planet coaster', 'zoo tycoon', 'sims', 'stardew', 'harvest moon'
+    ],
+    'Sports': [
+        'football', 'soccer', 'basketball', 'baseball', 'hockey', 'tennis', 'golf',
+        'nba', 'nfl', 'fifa', 'nhl', 'mlb', 'madden', 'pes', 'pro evolution',
+        'nba 2k', 'wwe', 'ufc', 'boxing', 'cricket', 'rugby'
+    ],
+    'Racing': [
+        'racing', 'rally', 'kart', 'drift', 'motorsport', 'karting', 'formula',
+        'f1', 'nascar', 'gt', 'gran turismo', 'forza', 'need for speed', 'nfs',
+        'mario kart', 'burnout', 'dirt', 'wreckfest', 'assetto corsa', 'project cars'
+    ],
+    'Adventure': [
+        'adventure', 'point and click', 'narrative', 'story-rich', 'cinematic',
+        'walking simulator', 'exploration', 'tomb raider', 'uncharted', 'life is strange',
+        'telltale', 'monkey island', 'grim fandango', 'broken sword', 'syberia'
+    ],
+    'Puzzle': [
+        'puzzle', 'match-3', 'brain', 'logic', 'riddle', 'maze', 'sokoban',
+        'portal', 'tetris', 'baba is you', 'witness', 'talos principle', 'myst',
+        'puzzle quest', 'professor layton', 'picross', 'sudoku'
+    ],
+    'Horror': [
+        'horror', 'survival horror', 'zombie', 'scary', 'fear', 'terror', 'creepy',
+        'resident evil', 'silent hill', 'dead space', 'outlast', 'amnesia',
+        'phasmophobia', 'dying light', 'left 4 dead', 'dead rising', 'evil within'
+    ],
+    'Survival': [
+        'survival', 'crafting', 'building', 'sandbox survival', 'open world survival',
+        'minecraft', 'terraria', 'ark', 'rust', 'valheim', 'subnautica', 'dont starve',
+        'the forest', 'green hell', 'raft', 'stranded'
+    ],
+    'Indie': [
+        'indie', 'pixel art', 'retro', '8-bit', '16-bit', 'roguelike', 'roguelite',
+        'metroidvania', 'souls-like', 'soulslike'
+    ],
+    'Casual': [
+        'casual', 'relaxing', 'chill', 'cozy', 'wholesome', 'family-friendly',
+        'party game', 'mini-games'
+    ],
+    'Platformer': [
+        'platformer', 'platform', 'metroidvania', 'side-scroller', '2d platformer',
+        'mario', 'sonic', 'crash bandicoot', 'rayman', 'celeste', 'hollow knight',
+        'ori and', 'super meat boy', 'shovel knight'
+    ],
+    'Shooter': [
+        'shooter', 'fps', 'first-person shooter', 'third-person shooter', 'tps',
+        'sniper', 'battle royale', 'extraction shooter', 'looter shooter',
+        'borderlands', 'destiny', 'warframe', 'apex', 'pubg', 'fortnite', 'overwatch'
+    ],
+    'Stealth': [
+        'stealth', 'assassin', 'infiltration', 'espionage', 'spy', 'hitman',
+        'metal gear', 'splinter cell', 'dishonored', 'thief', 'aragami', 'styx'
+    ],
+    'Open World': [
+        'open world', 'sandbox', 'free roam', 'gta', 'grand theft auto', 'red dead',
+        'watch dogs', 'saints row', 'sleeping dogs', 'just cause', 'mafia'
+    ],
+    'MOBA': [
+        'moba', 'multiplayer online battle arena', 'dota', 'league of legends', 'lol',
+        'smite', 'heroes of the storm'
+    ],
+    'Card Game': [
+        'card game', 'ccg', 'tcg', 'collectible card', 'deck builder', 'deckbuilding',
+        'hearthstone', 'gwent', 'magic', 'mtg', 'slay the spire', 'monster train'
+    ],
+    'Co-op': [
+        'co-op', 'coop', 'cooperative', 'multiplayer', 'local co-op', 'online co-op',
+        'split-screen', '2-player', '4-player'
+    ],
+    'VR': [
+        'vr', 'virtual reality', 'oculus', 'meta quest', 'vive', 'psvr', 'valve index'
+    ]
 };
 
 async function fetchGenresForDeals(deals) {
-    // Apply keyword-based genre detection for all games
+    // Apply enhanced keyword-based genre detection for all games
     deals.forEach(deal => {
         const titleLower = deal.title.toLowerCase();
         const detectedGenres = [];
 
-        // Check each genre's keywords
+        // Check each genre's keywords with better matching
         for (const [genre, keywords] of Object.entries(GENRE_KEYWORDS)) {
-            if (keywords.some(keyword => titleLower.includes(keyword))) {
-                detectedGenres.push(genre);
+            for (const keyword of keywords) {
+                // For single words, require word boundaries to avoid false positives
+                if (keyword.split(' ').length === 1 && keyword.length > 3) {
+                    // Use word boundary regex for single-word keywords
+                    const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+                    if (regex.test(titleLower)) {
+                        detectedGenres.push(genre);
+                        break; // Found match for this genre, move to next
+                    }
+                } else {
+                    // For phrases or short words, use simple includes
+                    if (titleLower.includes(keyword)) {
+                        detectedGenres.push(genre);
+                        break; // Found match for this genre, move to next
+                    }
+                }
             }
         }
 
-        // Assign detected genres
+        // Assign detected genres (remove duplicates)
         if (detectedGenres.length > 0) {
-            deal.genres = detectedGenres;
+            deal.genres = [...new Set(detectedGenres)];
         }
     });
 
