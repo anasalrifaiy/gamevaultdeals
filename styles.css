@@ -259,10 +259,12 @@ body {
 
 .free-games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--spacing-lg);
     max-width: 1400px;
     margin: 0 auto;
+    justify-content: center;
+    justify-items: center;
 }
 
 .free-game-card {
@@ -272,6 +274,8 @@ body {
     border: 2px solid rgba(76, 175, 80, 0.3);
     transition: all var(--transition-normal);
     position: relative;
+    width: 100%;
+    max-width: 320px;
 }
 
 .free-game-card:hover {

@@ -792,8 +792,7 @@ function showFreeGames() {
     // Find all free games (salePrice = 0)
     const freeGames = state.allDeals.filter(deal => parseFloat(deal.salePrice) === 0);
 
-    // Only show section if we have at least 3 free games (looks better in grid)
-    if (freeGames.length < 3) return;
+    if (freeGames.length === 0) return;
 
     const freeGamesSection = document.getElementById('freeGames');
     const freeGamesGrid = document.getElementById('freeGamesGrid');
