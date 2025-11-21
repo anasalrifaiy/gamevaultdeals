@@ -348,10 +348,7 @@ function applyFilters() {
         filtered = filtered.filter(deal => deal.salePrice <= state.filters.maxPrice);
     }
 
-    // Deduplicate - show only the best deal per game
-    filtered = deduplicateDeals(filtered);
-
-    // Sort
+    // Sort (deduplication already done when data was loaded)
     filtered = sortDeals(filtered, state.filters.sort);
 
     state.filteredDeals = filtered;
@@ -939,7 +936,9 @@ async function init() {
 
         // Fetch deals
         const deals = await fetchDeals();
-        state.allDeals = deals;
+
+        // Deduplicate deals to show only unique games
+        state.allDeals = deduplicateDeals(deals);
 
         // Update store filter with available stores
         updateStoreFilter();
@@ -1005,7 +1004,8 @@ async function autoRefreshDeals() {
 
         // Check if we got new data
         if (deals.length > 0) {
-            state.allDeals = deals;
+            // Deduplicate deals to show only unique games
+            state.allDeals = deduplicateDeals(deals);
 
             // Update everything
             updateStoreFilter();
