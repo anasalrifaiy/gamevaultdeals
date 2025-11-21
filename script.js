@@ -487,9 +487,8 @@ function createGameCard(deal) {
     const sortedAltStores = altStores.sort((a, b) => parseFloat(a.salePrice) - parseFloat(b.salePrice));
 
     return `
-        <div class="game-card${deal.dealRating >= 8.0 ? ' popular-deal' : ''}">
+        <div class="game-card">
             <div onclick="openDeal('${deal.dealID}')" style="cursor: pointer;">
-                ${deal.dealRating >= 8.0 ? '<div class="popular-badge">🔥 Popular</div>' : ''}
                 <img
                     src="${deal.thumb}"
                     alt="${deal.title}"
@@ -789,6 +788,45 @@ function updateStatistics() {
     document.getElementById('storeCount').textContent = `${uniqueStores}+`;
 }
 
+function showFreeGames() {
+    // Find all free games (salePrice = 0)
+    const freeGames = state.allDeals.filter(deal => parseFloat(deal.salePrice) === 0);
+
+    if (freeGames.length === 0) return;
+
+    const freeGamesSection = document.getElementById('freeGames');
+    const freeGamesGrid = document.getElementById('freeGamesGrid');
+
+    // Show up to 6 free games
+    const gamesToShow = freeGames.slice(0, 6);
+
+    freeGamesGrid.innerHTML = gamesToShow.map(game => {
+        return `
+            <div class="free-game-card" onclick="openDeal('${game.dealID}')" style="cursor: pointer;">
+                <div class="free-badge">FREE</div>
+                <img
+                    src="${game.thumb}"
+                    alt="${escapeHtml(game.title)}"
+                    class="free-game-image"
+                    loading="lazy"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
+                />
+                <div class="free-game-content">
+                    <h4 class="free-game-title">${escapeHtml(game.title)}</h4>
+                    <span class="free-game-store">📍 ${game.storeName}</span>
+                    <div class="free-game-price">
+                        <span class="free-game-original">$${game.normalPrice.toFixed(2)}</span>
+                        <span class="free-game-free">FREE</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Show the section
+    freeGamesSection.style.display = 'block';
+}
+
 function showDealOfTheDay() {
     // Find the deal with the highest discount percentage (75%+) and best rating
     const topDeals = state.allDeals
@@ -876,6 +914,7 @@ async function init() {
         updateStatistics();
 
         // Show Deal of the Day
+        showFreeGames();
         showDealOfTheDay();
 
         // Apply initial filters and render
