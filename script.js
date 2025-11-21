@@ -4,7 +4,7 @@ const CONFIG = {
     CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
     INITIAL_LOAD: 60,  // Show 60 initially
     LOAD_MORE_COUNT: 60,  // Load 60 more each time
-    MAX_FETCH: 0  // Fetch all available deals (0 = no limit)
+    MAX_FETCH: 600  // Fetch up to 600 deals (10 pages)
 };
 
 // Store names mapping (comprehensive list of legitimate PC game stores)
