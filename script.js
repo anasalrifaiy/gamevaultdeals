@@ -4,7 +4,7 @@ const CONFIG = {
     CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
     INITIAL_LOAD: 60,  // Show 60 initially
     LOAD_MORE_COUNT: 60,  // Load 60 more each time
-    MAX_FETCH: 300  // Fetch up to 300 deals total
+    MAX_FETCH: 0  // Fetch all available deals (0 = no limit)
 };
 
 // Store names mapping (comprehensive list of legitimate PC game stores)
@@ -263,7 +263,7 @@ function normalizeTitle(title) {
         .replace(/^[\s\-:]+|[\s\-:]+$/g, '');
 }
 
-// Deduplicate games - keep only the best deal per game title
+// Deduplicate games - group by title and track all stores
 function deduplicateDeals(deals) {
     const gameMap = new Map();
 
@@ -272,13 +272,41 @@ function deduplicateDeals(deals) {
         const existing = gameMap.get(titleKey);
 
         if (!existing) {
-            gameMap.set(titleKey, deal);
+            // First occurrence - create entry with stores array
+            gameMap.set(titleKey, {
+                ...deal,
+                alternativeStores: []
+            });
         } else {
-            // Keep the deal with the lower sale price
-            // If prices are equal, keep the one with better deal rating
-            if (deal.salePrice < existing.salePrice ||
-                (deal.salePrice === existing.salePrice && deal.dealRating > existing.dealRating)) {
-                gameMap.set(titleKey, deal);
+            // Game already exists - add this store as alternative
+            const currentBestPrice = parseFloat(existing.salePrice);
+            const newPrice = parseFloat(deal.salePrice);
+
+            if (newPrice < currentBestPrice) {
+                // New deal is cheaper - make it primary, old becomes alternative
+                existing.alternativeStores.push({
+                    storeName: existing.storeName,
+                    storeID: existing.storeID,
+                    salePrice: existing.salePrice,
+                    normalPrice: existing.normalPrice,
+                    savings: existing.savings,
+                    dealID: existing.dealID
+                });
+                // Update primary deal
+                Object.assign(existing, {
+                    ...deal,
+                    alternativeStores: existing.alternativeStores
+                });
+            } else {
+                // Existing deal is cheaper - add new as alternative
+                existing.alternativeStores.push({
+                    storeName: deal.storeName,
+                    storeID: deal.storeID,
+                    salePrice: deal.salePrice,
+                    normalPrice: deal.normalPrice,
+                    savings: deal.savings,
+                    dealID: deal.dealID
+                });
             }
         }
     });
@@ -454,38 +482,69 @@ function createGameCard(deal) {
     const discountPercent = Math.round(deal.savings);
     const dealRatingStars = '⭐'.repeat(Math.min(Math.round(deal.dealRating / 2), 5));
 
+    // Sort alternative stores by price
+    const altStores = deal.alternativeStores || [];
+    const sortedAltStores = altStores.sort((a, b) => parseFloat(a.salePrice) - parseFloat(b.salePrice));
+
     return `
-        <div class="game-card" onclick="openDeal('${deal.dealID}')">
-            <img
-                src="${deal.thumb}"
-                alt="${deal.title}"
-                class="game-image"
-                loading="lazy"
-                onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
-            />
-            <div class="game-content">
-                <h3 class="game-title">${escapeHtml(deal.title)}</h3>
-                <span class="game-store">${deal.storeName}</span>
+        <div class="game-card">
+            <div onclick="openDeal('${deal.dealID}')" style="cursor: pointer;">
+                <img
+                    src="${deal.thumb}"
+                    alt="${deal.title}"
+                    class="game-image"
+                    loading="lazy"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
+                />
+                <div class="game-content">
+                    <h3 class="game-title">${escapeHtml(deal.title)}</h3>
+                    <span class="game-store">${deal.storeName} <span style="color: #4CAF50; font-size: 0.85em;">⭐ Best Price</span></span>
 
-                <div class="game-pricing">
-                    <div class="game-discount">-${discountPercent}%</div>
-                    <div class="game-price-box">
-                        <span class="game-price-original">$${deal.normalPrice.toFixed(2)}</span>
-                        <span class="game-price-current">$${deal.salePrice.toFixed(2)}</span>
+                    <div class="game-pricing">
+                        <div class="game-discount">-${discountPercent}%</div>
+                        <div class="game-price-box">
+                            <span class="game-price-original">$${deal.normalPrice.toFixed(2)}</span>
+                            <span class="game-price-current">$${deal.salePrice.toFixed(2)}</span>
+                        </div>
                     </div>
-                </div>
 
-                <div class="game-savings">
-                    Save $${deal.savingsAmount.toFixed(2)}
-                </div>
-
-                ${deal.dealRating > 0 ? `
-                    <div class="game-deal-rating">
-                        <span class="deal-stars">${dealRatingStars}</span>
-                        <span>Deal Rating: ${deal.dealRating.toFixed(1)}</span>
+                    <div class="game-savings">
+                        Save $${deal.savingsAmount.toFixed(2)}
                     </div>
-                ` : ''}
+
+                    ${deal.dealRating > 0 ? `
+                        <div class="game-deal-rating">
+                            <span class="deal-stars">${dealRatingStars}</span>
+                            <span>Deal Rating: ${deal.dealRating.toFixed(1)}</span>
+                        </div>
+                    ` : ''}
+                </div>
             </div>
+
+            ${sortedAltStores.length > 0 ? `
+                <div class="alternative-stores">
+                    <div class="alt-stores-header" onclick="toggleAltStores(this)">
+                        <span>📍 Also available at ${sortedAltStores.length} other store${sortedAltStores.length > 1 ? 's' : ''}</span>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="alt-stores-list" style="display: none;">
+                        ${sortedAltStores.map(alt => {
+                            const altDiscount = Math.round(alt.savings);
+                            const priceDiff = (parseFloat(alt.salePrice) - parseFloat(deal.salePrice)).toFixed(2);
+                            return `
+                                <div class="alt-store-item" onclick="openDeal('${alt.dealID}'); event.stopPropagation();">
+                                    <div class="alt-store-name">${alt.storeName}</div>
+                                    <div class="alt-store-price">
+                                        <span class="alt-price">$${parseFloat(alt.salePrice).toFixed(2)}</span>
+                                        <span class="alt-discount">-${altDiscount}%</span>
+                                        ${priceDiff > 0 ? `<span class="price-diff">+$${priceDiff}</span>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            ` : ''}
         </div>
     `;
 }
@@ -499,6 +558,19 @@ function escapeHtml(text) {
 function openDeal(dealID) {
     const url = `https://www.cheapshark.com/redirect?dealID=${dealID}`;
     window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+function toggleAltStores(header) {
+    const list = header.nextElementSibling;
+    const icon = header.querySelector('.toggle-icon');
+
+    if (list.style.display === 'none') {
+        list.style.display = 'block';
+        icon.textContent = '▲';
+    } else {
+        list.style.display = 'none';
+        icon.textContent = '▼';
+    }
 }
 
 function updateActiveFilters() {
