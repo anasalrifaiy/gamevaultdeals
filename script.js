@@ -695,6 +695,84 @@ function setupEventListeners() {
     });
 }
 
+// ===== Statistics & Deal of the Day =====
+function updateStatistics() {
+    const totalDeals = state.allDeals.length;
+    const avgDiscount = Math.round(
+        state.allDeals.reduce((sum, deal) => sum + deal.savings, 0) / totalDeals
+    );
+    const uniqueStores = new Set(state.allDeals.map(d => d.storeID)).size;
+
+    document.getElementById('totalDealsCount').textContent = totalDeals;
+    document.getElementById('avgDiscountValue').textContent = `${avgDiscount}%`;
+    document.getElementById('storeCount').textContent = `${uniqueStores}+`;
+}
+
+function showDealOfTheDay() {
+    // Find the deal with the highest discount percentage (75%+) and best rating
+    const topDeals = state.allDeals
+        .filter(deal => deal.savings >= 75)
+        .sort((a, b) => {
+            // Sort by savings first, then by deal rating
+            if (b.savings !== a.savings) {
+                return b.savings - a.savings;
+            }
+            return b.dealRating - a.dealRating;
+        });
+
+    if (topDeals.length === 0) {
+        // If no 75%+ deals, just get the highest discount
+        topDeals.push(...state.allDeals.sort((a, b) => b.savings - a.savings));
+    }
+
+    const dealOfDay = topDeals[0];
+    if (!dealOfDay) return;
+
+    const discountPercent = Math.round(dealOfDay.savings);
+    const savingsAmount = dealOfDay.savingsAmount.toFixed(2);
+
+    const dealOfDaySection = document.getElementById('dealOfDay');
+    const dealOfDayCard = document.getElementById('dealOfDayCard');
+
+    dealOfDayCard.innerHTML = `
+        <img
+            src="${dealOfDay.thumb}"
+            alt="${dealOfDay.title}"
+            class="deal-of-day-image"
+            loading="eager"
+            onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
+        />
+        <div class="deal-of-day-content">
+            <h3 class="deal-of-day-title">${escapeHtml(dealOfDay.title)}</h3>
+            <span class="deal-of-day-store">${dealOfDay.storeName}</span>
+
+            <div class="deal-of-day-pricing">
+                <div class="deal-of-day-discount">-${discountPercent}%</div>
+                <div class="deal-of-day-prices">
+                    <span class="deal-of-day-original">$${dealOfDay.normalPrice.toFixed(2)}</span>
+                    <span class="deal-of-day-current">$${dealOfDay.salePrice.toFixed(2)}</span>
+                </div>
+            </div>
+
+            <div class="deal-of-day-savings">
+                💰 You Save $${savingsAmount}! 💰
+            </div>
+
+            <a
+                href="https://www.cheapshark.com/redirect?dealID=${dealOfDay.dealID}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="deal-of-day-btn"
+            >
+                🔥 Get This Deal Now 🔥
+            </a>
+        </div>
+    `;
+
+    // Show the section
+    dealOfDaySection.style.display = 'block';
+}
+
 // ===== Initialization =====
 async function init() {
     try {
@@ -712,6 +790,12 @@ async function init() {
 
         // Restore saved filter values to UI elements
         restoreSavedFiltersToUI();
+
+        // Update statistics badges
+        updateStatistics();
+
+        // Show Deal of the Day
+        showDealOfTheDay();
 
         // Apply initial filters and render
         updateFiltersAndRender();

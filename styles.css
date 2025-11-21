@@ -191,6 +191,236 @@ body {
     color: var(--text-secondary);
     position: relative;
     z-index: 1;
+    margin-bottom: var(--spacing-xl);
+}
+
+/* ===== Hero Statistics Badges ===== */
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-badge {
+    background: rgba(26, 26, 62, 0.8);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(108, 99, 255, 0.3);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    text-align: center;
+    transition: all var(--transition-normal);
+}
+
+.stat-badge:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-light);
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ===== Deal of the Day Section ===== */
+.deal-of-day-section {
+    background: var(--bg-dark);
+    padding: var(--spacing-xl) 0;
+    border-top: 2px solid rgba(255, 101, 132, 0.3);
+    border-bottom: 2px solid rgba(255, 101, 132, 0.3);
+}
+
+.section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.title-icon {
+    font-size: 2rem;
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.2) rotate(10deg); }
+    50% { transform: scale(1) rotate(0deg); }
+    75% { transform: scale(1.2) rotate(-10deg); }
+}
+
+.deal-of-day-card {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    border: 2px solid rgba(255, 101, 132, 0.3);
+    box-shadow: var(--shadow-xl), 0 0 40px rgba(255, 101, 132, 0.2);
+    transition: all var(--transition-normal);
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--spacing-lg);
+    align-items: center;
+}
+
+.deal-of-day-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl), 0 0 60px rgba(255, 101, 132, 0.3);
+}
+
+.deal-of-day-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #1A1A3E 0%, #2D2D5F 100%);
+}
+
+.deal-of-day-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.deal-of-day-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+}
+
+.deal-of-day-store {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    background: rgba(78, 205, 196, 0.2);
+    color: var(--accent);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: fit-content;
+}
+
+.deal-of-day-pricing {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+}
+
+.deal-of-day-discount {
+    background: var(--gradient-secondary);
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+.deal-of-day-prices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.deal-of-day-original {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    font-size: 1.2rem;
+}
+
+.deal-of-day-current {
+    color: var(--success);
+    font-weight: 700;
+    font-size: 2.5rem;
+}
+
+.deal-of-day-savings {
+    padding: var(--spacing-sm);
+    background: rgba(0, 217, 165, 0.1);
+    border-radius: var(--radius-sm);
+    color: var(--success);
+    font-size: 1rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.deal-of-day-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xl);
+    background: var(--gradient-secondary);
+    border: none;
+    border-radius: var(--radius-lg);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-md);
+    margin-top: var(--spacing-sm);
+    text-decoration: none;
+}
+
+.deal-of-day-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Responsive for Deal of the Day */
+@media (max-width: 768px) {
+    .deal-of-day-card {
+        grid-template-columns: 1fr;
+        padding: var(--spacing-md);
+    }
+
+    .deal-of-day-title {
+        font-size: 1.4rem;
+    }
+
+    .deal-of-day-discount {
+        font-size: 1.5rem;
+    }
+
+    .deal-of-day-current {
+        font-size: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+    }
+
+    .hero-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* ===== Filters Section ===== */
