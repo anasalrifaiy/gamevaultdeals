@@ -978,6 +978,22 @@ body {
     font-size: 0.9rem;
 }
 
+.footer-email {
+    display: inline-block;
+    margin-top: var(--spacing-xs);
+    color: var(--primary-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    border-bottom: 1px solid transparent;
+}
+
+.footer-email:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    transform: translateX(2px);
+}
+
 /* ===== Responsive Design ===== */
 @media (max-width: 768px) {
     .hero-title {
