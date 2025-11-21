@@ -963,6 +963,9 @@ async function init() {
         // Setup event listeners
         setupEventListeners();
 
+        // Start auto-refresh
+        startAutoRefresh();
+
     } catch (error) {
         elements.resultCount.textContent = 'Failed to load deals. Please refresh the page.';
         elements.gamesGrid.innerHTML = `
@@ -984,6 +987,78 @@ async function init() {
         `;
     } finally {
         setLoading(false);
+    }
+}
+
+// ===== Auto-Refresh Functionality =====
+let refreshInterval = null;
+
+async function autoRefreshDeals() {
+    try {
+        console.log('Auto-refreshing deals...');
+
+        // Save current scroll position
+        const scrollPosition = window.pageYOffset;
+
+        // Fetch fresh deals (will use cache if still valid)
+        const deals = await fetchDeals();
+
+        // Check if we got new data
+        if (deals.length > 0) {
+            state.allDeals = deals;
+
+            // Update everything
+            updateStoreFilter();
+            updateGenreFilter();
+            updateStatistics();
+            showFreeGames();
+            showDealOfTheDay();
+            updateFiltersAndRender();
+
+            // Restore scroll position
+            window.scrollTo(0, scrollPosition);
+
+            // Show notification
+            showUpdateNotification();
+        }
+    } catch (error) {
+        console.error('Auto-refresh failed:', error);
+        // Silently fail - don't disturb the user
+    }
+}
+
+function showUpdateNotification() {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'update-notification';
+    notification.innerHTML = '✨ Deals updated with latest offers!';
+    document.body.appendChild(notification);
+
+    // Show notification
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+
+    // Hide and remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+function startAutoRefresh() {
+    // Refresh every 5 minutes (300000 milliseconds)
+    refreshInterval = setInterval(autoRefreshDeals, 300000);
+    console.log('Auto-refresh started: Updates every 5 minutes');
+}
+
+function stopAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+        console.log('Auto-refresh stopped');
     }
 }
 
