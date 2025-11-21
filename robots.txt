@@ -1,0 +1,9 @@
+# Allow all search engines to crawl the entire site
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://gamevaultdeals.com/sitemap.xml
+
+# Crawl delay (be nice to servers)
+Crawl-delay: 1
