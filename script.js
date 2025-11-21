@@ -487,8 +487,9 @@ function createGameCard(deal) {
     const sortedAltStores = altStores.sort((a, b) => parseFloat(a.salePrice) - parseFloat(b.salePrice));
 
     return `
-        <div class="game-card">
+        <div class="game-card${deal.dealRating >= 8.0 ? ' popular-deal' : ''}">
             <div onclick="openDeal('${deal.dealID}')" style="cursor: pointer;">
+                ${deal.dealRating >= 8.0 ? '<div class="popular-badge">🔥 Popular</div>' : ''}
                 <img
                     src="${deal.thumb}"
                     alt="${deal.title}"

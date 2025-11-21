@@ -665,6 +665,16 @@ body {
     transition: all var(--transition-normal);
     border: 1px solid rgba(108, 99, 255, 0.1);
     animation: fadeInUp 0.5s ease;
+    position: relative;
+}
+
+.game-card.popular-deal {
+    border-color: rgba(255, 152, 0, 0.4);
+}
+
+.game-card.popular-deal:hover {
+    border-color: #FF9800;
+    box-shadow: var(--shadow-xl), 0 0 30px rgba(255, 152, 0, 0.3);
 }
 
 @keyframes fadeInUp {
@@ -682,6 +692,30 @@ body {
     transform: translateY(-4px);
     border-color: var(--primary);
     box-shadow: var(--shadow-xl), var(--shadow-glow);
+}
+
+.popular-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 700;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
 }
 
 .game-image {
