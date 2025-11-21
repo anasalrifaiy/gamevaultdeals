@@ -360,6 +360,128 @@ body {
     font-size: 1.1rem;
 }
 
+/* ===== Featured Free Game (Single Game) ===== */
+.free-games-featured {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.free-game-featured-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    border: 2px solid rgba(76, 175, 80, 0.4);
+    box-shadow: var(--shadow-xl), 0 0 40px rgba(76, 175, 80, 0.2);
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--spacing-lg);
+    transition: all var(--transition-normal);
+}
+
+.free-game-featured-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl), 0 0 60px rgba(76, 175, 80, 0.3);
+    border-color: var(--success);
+}
+
+.free-game-featured-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #1A1A3E 0%, #2D2D5F 100%);
+}
+
+.free-game-featured-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.free-game-featured-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-primary);
+}
+
+.free-game-featured-store {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    background: rgba(76, 175, 80, 0.2);
+    color: var(--success);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-weight: 500;
+    width: fit-content;
+}
+
+.free-game-featured-pricing {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+}
+
+.free-badge-large {
+    background: linear-gradient(135deg, #4CAF50 0%, #00D9A5 100%);
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 1.3rem;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.5);
+}
+
+.free-game-featured-prices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.free-game-featured-original {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    font-size: 1.2rem;
+}
+
+.free-game-featured-free {
+    color: var(--success);
+    font-weight: 700;
+    font-size: 2.5rem;
+    text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+}
+
+.free-game-featured-cta {
+    padding: var(--spacing-sm);
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(0, 217, 165, 0.2) 100%);
+    border-radius: var(--radius-sm);
+    color: var(--success);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    margin-top: auto;
+}
+
+/* Responsive for Featured Free Game */
+@media (max-width: 768px) {
+    .free-game-featured-card {
+        grid-template-columns: 1fr;
+    }
+
+    .free-game-featured-image {
+        height: 180px;
+    }
+
+    .free-game-featured-title {
+        font-size: 1.5rem;
+    }
+
+    .free-game-featured-free {
+        font-size: 2rem;
+    }
+}
+
 /* ===== Deal of the Day Section ===== */
 .deal-of-day-section {
     background: var(--bg-dark);

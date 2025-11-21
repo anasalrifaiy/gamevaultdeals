@@ -800,28 +800,65 @@ function showFreeGames() {
     // Show up to 6 free games
     const gamesToShow = freeGames.slice(0, 6);
 
-    freeGamesGrid.innerHTML = gamesToShow.map(game => {
-        return `
-            <div class="free-game-card" onclick="openDeal('${game.dealID}')" style="cursor: pointer;">
-                <div class="free-badge">FREE</div>
+    // If only 1 free game, show it as a featured card (like Deal of the Day)
+    if (gamesToShow.length === 1) {
+        const game = gamesToShow[0];
+        freeGamesGrid.className = 'free-games-featured';
+        freeGamesGrid.innerHTML = `
+            <div class="free-game-featured-card" onclick="openDeal('${game.dealID}')" style="cursor: pointer;">
                 <img
                     src="${game.thumb}"
                     alt="${escapeHtml(game.title)}"
-                    class="free-game-image"
-                    loading="lazy"
+                    class="free-game-featured-image"
+                    loading="eager"
                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
                 />
-                <div class="free-game-content">
-                    <h4 class="free-game-title">${escapeHtml(game.title)}</h4>
-                    <span class="free-game-store">📍 ${game.storeName}</span>
-                    <div class="free-game-price">
-                        <span class="free-game-original">$${game.normalPrice.toFixed(2)}</span>
-                        <span class="free-game-free">FREE</span>
+                <div class="free-game-featured-content">
+                    <h3 class="free-game-featured-title">${escapeHtml(game.title)}</h3>
+                    <span class="free-game-featured-store">📍 Available at ${game.storeName}</span>
+
+                    <div class="free-game-featured-pricing">
+                        <div class="free-game-featured-badge">
+                            <div class="free-badge-large">100% OFF</div>
+                        </div>
+                        <div class="free-game-featured-prices">
+                            <span class="free-game-featured-original">Was: $${game.normalPrice.toFixed(2)}</span>
+                            <span class="free-game-featured-free">NOW FREE!</span>
+                        </div>
+                    </div>
+
+                    <div class="free-game-featured-cta">
+                        🎁 Claim This Free Game Now! 🎁
                     </div>
                 </div>
             </div>
         `;
-    }).join('');
+    } else {
+        // Multiple games: use grid layout
+        freeGamesGrid.className = 'free-games-grid';
+        freeGamesGrid.innerHTML = gamesToShow.map(game => {
+            return `
+                <div class="free-game-card" onclick="openDeal('${game.dealID}')" style="cursor: pointer;">
+                    <div class="free-badge">FREE</div>
+                    <img
+                        src="${game.thumb}"
+                        alt="${escapeHtml(game.title)}"
+                        class="free-game-image"
+                        loading="lazy"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
+                    />
+                    <div class="free-game-content">
+                        <h4 class="free-game-title">${escapeHtml(game.title)}</h4>
+                        <span class="free-game-store">📍 ${game.storeName}</span>
+                        <div class="free-game-price">
+                            <span class="free-game-original">$${game.normalPrice.toFixed(2)}</span>
+                            <span class="free-game-free">FREE</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 
     // Show the section
     freeGamesSection.style.display = 'block';
