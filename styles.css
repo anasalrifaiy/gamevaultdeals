@@ -630,6 +630,7 @@ body {
     margin-top: var(--spacing-sm);
     text-decoration: none;
     white-space: nowrap;
+    align-self: center;
 }
 
 .deal-of-day-btn:hover {
