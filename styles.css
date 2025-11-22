@@ -629,6 +629,7 @@ body {
     box-shadow: var(--shadow-md);
     margin-top: var(--spacing-sm);
     text-decoration: none;
+    white-space: nowrap;
 }
 
 .deal-of-day-btn:hover {
