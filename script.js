@@ -881,6 +881,96 @@ function updateStatistics() {
     document.getElementById('storeCount').textContent = `${uniqueStores}+`;
 }
 
+// ===== Most Popular Games =====
+const POPULAR_GAMES = [
+    'Grand Theft Auto', 'GTA V', 'GTA 5', 'GTA VI', 'GTA 6',
+    'Counter-Strike', 'CS:GO', 'CS2', 'Counter Strike',
+    'PUBG', 'PlayerUnknown',
+    'Valorant',
+    'FC 24', 'FC 25', 'FIFA',
+    'Call of Duty', 'COD', 'Modern Warfare', 'Warzone',
+    'Apex Legends',
+    'Fortnite',
+    'Minecraft',
+    'Elden Ring',
+    'Red Dead Redemption',
+    'Cyberpunk 2077',
+    'The Witcher',
+    'Dark Souls',
+    'League of Legends',
+    'Dota 2',
+    'Overwatch',
+    'Destiny 2',
+    'Rainbow Six Siege',
+    'Rocket League',
+    'Battlefield',
+    'Resident Evil',
+    'God of War',
+    'Spider-Man',
+    'Hogwarts Legacy',
+    'Baldur\'s Gate',
+    'Starfield',
+    'Palworld',
+    'Helldivers'
+];
+
+function isPopularGame(title) {
+    const titleLower = title.toLowerCase();
+    return POPULAR_GAMES.some(popularGame =>
+        titleLower.includes(popularGame.toLowerCase())
+    );
+}
+
+function showMostPopularGames() {
+    // Find popular games from the deals
+    const popularDeals = state.allDeals
+        .filter(deal => isPopularGame(deal.title))
+        .sort((a, b) => {
+            // Sort by deal rating first, then by discount
+            if (b.dealRating !== a.dealRating) {
+                return b.dealRating - a.dealRating;
+            }
+            return b.savings - a.savings;
+        })
+        .slice(0, 6); // Show up to 6 popular games
+
+    if (popularDeals.length === 0) return;
+
+    const popularGamesSection = document.getElementById('popularGames');
+    const popularGamesGrid = document.getElementById('popularGamesGrid');
+
+    popularGamesGrid.innerHTML = popularDeals.map(deal => {
+        const discountPercent = Math.round(deal.savings);
+        return `
+            <div class="popular-game-card" onclick="openDeal('${deal.dealID}')" style="cursor: pointer;">
+                <div class="popular-badge">🔥 POPULAR</div>
+                <img
+                    src="${deal.thumb}"
+                    alt="${escapeHtml(deal.title)}"
+                    class="popular-game-image"
+                    loading="eager"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
+                />
+                <div class="popular-game-content">
+                    <h4 class="popular-game-title">${escapeHtml(deal.title)}</h4>
+                    <span class="popular-game-store">📍 ${deal.storeName}</span>
+
+                    <div class="popular-game-pricing">
+                        <div class="popular-game-discount">-${discountPercent}%</div>
+                        <div class="popular-game-prices">
+                            <span class="popular-game-original">$${deal.normalPrice.toFixed(2)}</span>
+                            <span class="popular-game-current">$${deal.salePrice.toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Show the section
+    popularGamesSection.style.display = 'block';
+}
+
 function showDealOfTheDay() {
     // Find the deal with the highest discount percentage (75%+) and best rating
     // Exclude free games
@@ -972,7 +1062,8 @@ async function init() {
         // Update statistics badges
         updateStatistics();
 
-        // Show Deal of the Day
+        // Show Most Popular Games and Deal of the Day
+        showMostPopularGames();
         showDealOfTheDay();
 
         // Apply initial filters and render
@@ -1030,6 +1121,7 @@ async function autoRefreshDeals() {
             updateStoreFilter();
             updateGenreFilter();
             updateStatistics();
+            showMostPopularGames();
             showDealOfTheDay();
             updateFiltersAndRender();
 

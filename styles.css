@@ -241,6 +241,135 @@ body {
     letter-spacing: 0.5px;
 }
 
+/* ===== Most Popular Games Section ===== */
+.popular-games-section {
+    background: linear-gradient(135deg, rgba(255, 82, 82, 0.05) 0%, rgba(255, 140, 0, 0.05) 100%);
+    padding: var(--spacing-xl) 0;
+    border-top: 2px solid rgba(255, 82, 82, 0.3);
+    border-bottom: 2px solid rgba(255, 82, 82, 0.3);
+}
+
+.section-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+}
+
+.popular-games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.popular-game-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 2px solid rgba(255, 82, 82, 0.3);
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.popular-game-card:hover {
+    transform: translateY(-8px);
+    border-color: #FF5252;
+    box-shadow: var(--shadow-xl), 0 0 30px rgba(255, 82, 82, 0.4);
+}
+
+.popular-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #FF5252 0%, #FF8C00 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 700;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(255, 82, 82, 0.5);
+    animation: pulse-popular 2s infinite;
+}
+
+@keyframes pulse-popular {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(255, 82, 82, 0.5);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(255, 82, 82, 0.8);
+        transform: scale(1.05);
+    }
+}
+
+.popular-game-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #1A1A3E 0%, #2D2D5F 100%);
+}
+
+.popular-game-content {
+    padding: var(--spacing-md);
+}
+
+.popular-game-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.4em;
+    color: var(--text-primary);
+}
+
+.popular-game-store {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.popular-game-pricing {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.popular-game-discount {
+    background: linear-gradient(135deg, #FF5252 0%, #FF8C00 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.popular-game-prices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.popular-game-original {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    font-size: 0.85rem;
+}
+
+.popular-game-current {
+    color: #FF5252;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
 /* ===== Deal of the Day Section ===== */
 .deal-of-day-section {
     background: var(--bg-dark);
