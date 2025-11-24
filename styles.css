@@ -258,12 +258,12 @@ body {
 }
 
 .popular-games-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: var(--spacing-lg);
     max-width: 1400px;
     margin: 0 auto;
-    justify-items: center;
 }
 
 .popular-game-card {
@@ -273,6 +273,9 @@ body {
     border: 2px solid rgba(255, 82, 82, 0.3);
     transition: all var(--transition-normal);
     position: relative;
+    width: 100%;
+    max-width: 320px;
+    flex: 0 0 auto;
 }
 
 .popular-game-card:hover {
