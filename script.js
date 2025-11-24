@@ -1,7 +1,7 @@
 // ===== Configuration =====
 const CONFIG = {
     API_BASE: 'https://www.cheapshark.com/api/1.0',
-    CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
+    CACHE_DURATION: 15 * 60 * 1000, // 15 minutes
     INITIAL_LOAD: 60,  // Show 60 initially
     LOAD_MORE_COUNT: 60,  // Load 60 more each time
     MAX_FETCH: 600  // Fetch up to 600 deals (10 pages)
@@ -881,85 +881,9 @@ function updateStatistics() {
     document.getElementById('storeCount').textContent = `${uniqueStores}+`;
 }
 
-function showFreeGames() {
-    // Find all free games (salePrice = 0)
-    const freeGames = state.allDeals.filter(deal => parseFloat(deal.salePrice) === 0);
-
-    if (freeGames.length === 0) return;
-
-    const freeGamesSection = document.getElementById('freeGames');
-    const freeGamesGrid = document.getElementById('freeGamesGrid');
-
-    // Show up to 6 free games
-    const gamesToShow = freeGames.slice(0, 6);
-
-    // If only 1 free game, show it as a featured card (like Deal of the Day)
-    if (gamesToShow.length === 1) {
-        const game = gamesToShow[0];
-        freeGamesGrid.className = 'free-games-featured';
-        freeGamesGrid.innerHTML = `
-            <div class="free-game-featured-card" onclick="openDeal('${game.dealID}')" style="cursor: pointer;">
-                <img
-                    src="${game.thumb}"
-                    alt="${escapeHtml(game.title)}"
-                    class="free-game-featured-image"
-                    loading="eager"
-                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
-                />
-                <div class="free-game-featured-content">
-                    <h3 class="free-game-featured-title">${escapeHtml(game.title)}</h3>
-                    <span class="free-game-featured-store">📍 Available at ${game.storeName}</span>
-
-                    <div class="free-game-featured-pricing">
-                        <div class="free-game-featured-badge">
-                            <div class="free-badge-large">100% OFF</div>
-                        </div>
-                        <div class="free-game-featured-prices">
-                            <span class="free-game-featured-original">Was: $${game.normalPrice.toFixed(2)}</span>
-                            <span class="free-game-featured-free">NOW FREE!</span>
-                        </div>
-                    </div>
-
-                    <div class="free-game-featured-cta">
-                        🎁 Claim This Free Game Now! 🎁
-                    </div>
-                </div>
-            </div>
-        `;
-    } else {
-        // Multiple games: use grid layout
-        freeGamesGrid.className = 'free-games-grid';
-        freeGamesGrid.innerHTML = gamesToShow.map(game => {
-            return `
-                <div class="free-game-card" onclick="openDeal('${game.dealID}')" style="cursor: pointer;">
-                    <div class="free-badge">FREE</div>
-                    <img
-                        src="${game.thumb}"
-                        alt="${escapeHtml(game.title)}"
-                        class="free-game-image"
-                        loading="lazy"
-                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
-                    />
-                    <div class="free-game-content">
-                        <h4 class="free-game-title">${escapeHtml(game.title)}</h4>
-                        <span class="free-game-store">📍 ${game.storeName}</span>
-                        <div class="free-game-price">
-                            <span class="free-game-original">$${game.normalPrice.toFixed(2)}</span>
-                            <span class="free-game-free">FREE</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    // Show the section
-    freeGamesSection.style.display = 'block';
-}
-
 function showDealOfTheDay() {
     // Find the deal with the highest discount percentage (75%+) and best rating
-    // Exclude free games (they have their own section)
+    // Exclude free games
     const topDeals = state.allDeals
         .filter(deal => parseFloat(deal.salePrice) > 0 && deal.savings >= 75)
         .sort((a, b) => {
@@ -1049,7 +973,6 @@ async function init() {
         updateStatistics();
 
         // Show Deal of the Day
-        showFreeGames();
         showDealOfTheDay();
 
         // Apply initial filters and render
@@ -1107,7 +1030,6 @@ async function autoRefreshDeals() {
             updateStoreFilter();
             updateGenreFilter();
             updateStatistics();
-            showFreeGames();
             showDealOfTheDay();
             updateFiltersAndRender();
 
@@ -1145,9 +1067,9 @@ function showUpdateNotification() {
 }
 
 function startAutoRefresh() {
-    // Refresh every 5 minutes (300000 milliseconds)
-    refreshInterval = setInterval(autoRefreshDeals, 300000);
-    console.log('Auto-refresh started: Updates every 5 minutes');
+    // Refresh every 15 minutes (900000 milliseconds)
+    refreshInterval = setInterval(autoRefreshDeals, 900000);
+    console.log('Auto-refresh started: Updates every 15 minutes');
 }
 
 function stopAutoRefresh() {
