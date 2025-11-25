@@ -1,10 +1,22 @@
 // ===== Configuration =====
 const CONFIG = {
-    API_BASE: 'https://www.cheapshark.com/api/1.0',
+    // API Keys - Get yours free at:
+    // ITAD: https://isthereanydeal.com/dev/app/
+    // RAWG: https://rawg.io/apidocs
+    ITAD_API_KEY: 'YOUR_ITAD_API_KEY_HERE', // Replace with your key
+    RAWG_API_KEY: 'YOUR_RAWG_API_KEY_HERE', // Replace with your key
+
+    // API Endpoints
+    ITAD_API_BASE: 'https://api.isthereanydeal.com',
+    RAWG_API_BASE: 'https://api.rawg.io/api',
+    CHEAPSHARK_API_BASE: 'https://www.cheapshark.com/api/1.0', // Fallback
+
     CACHE_DURATION: 15 * 60 * 1000, // 15 minutes
     INITIAL_LOAD: 60,  // Show 60 initially
     LOAD_MORE_COUNT: 60,  // Load 60 more each time
-    MAX_FETCH: 600  // Fetch up to 600 deals (10 pages)
+    MAX_FETCH: 1000,  // Fetch up to 1000 deals
+    USE_ITAD: false, // Set to true once you have API key
+    USE_RAWG: false  // Set to true once you have API key
 };
 
 // Store names mapping (comprehensive list of legitimate PC game stores)
@@ -138,36 +150,34 @@ async function fetchDeals() {
         }
     }
 
+    // Use ITAD if enabled and has API key, otherwise use CheapShark
+    if (CONFIG.USE_ITAD && CONFIG.ITAD_API_KEY !== 'YOUR_ITAD_API_KEY_HERE') {
+        return await fetchDealsFromITAD();
+    } else {
+        return await fetchDealsFromCheapShark();
+    }
+}
+
+// Fetch deals from CheapShark (Original method)
+async function fetchDealsFromCheapShark() {
     try {
         const allDeals = [];
-        const pageSize = 60; // API max per request
-        const maxPages = Math.ceil(CONFIG.MAX_FETCH / pageSize); // Get 5 pages for 300 deals
+        const pageSize = 60;
+        const maxPages = Math.ceil(CONFIG.MAX_FETCH / pageSize);
 
-        // Fetch multiple pages
         for (let page = 0; page < maxPages; page++) {
             const response = await fetch(
-                `${CONFIG.API_BASE}/deals?pageSize=${pageSize}&pageNumber=${page}&onSale=1`
+                `${CONFIG.CHEAPSHARK_API_BASE}/deals?pageSize=${pageSize}&pageNumber=${page}&onSale=1`
             );
 
-            if (!response.ok) {
-                break;
-            }
-
+            if (!response.ok) break;
             const deals = await response.json();
-
-            if (deals.length === 0) {
-                break;
-            }
+            if (deals.length === 0) break;
 
             allDeals.push(...deals);
-
-            // If we got fewer than requested, there are no more pages
-            if (deals.length < pageSize) {
-                break;
-            }
+            if (deals.length < pageSize) break;
         }
 
-        // Filter out deals without discounts and enrich data
         const enrichedDeals = allDeals
             .filter(deal => parseFloat(deal.savings) > 0)
             .map(deal => ({
@@ -183,13 +193,11 @@ async function fetchDeals() {
                 thumb: deal.thumb,
                 savingsAmount: parseFloat(deal.normalPrice) - parseFloat(deal.salePrice),
                 steamAppID: deal.steamAppID || null,
-                genres: [] // Will be populated by fetchGenres
+                genres: []
             }));
 
-        // Fetch genres for Steam games in background
         fetchGenresForDeals(enrichedDeals);
 
-        // Cache the results
         state.cache.data = enrichedDeals;
         state.cache.timestamp = Date.now();
 
@@ -197,6 +205,94 @@ async function fetchDeals() {
     } catch (error) {
         throw error;
     }
+}
+
+// Fetch deals from IsThereAnyDeal (NEW - More deals!)
+async function fetchDealsFromITAD() {
+    try {
+        // Note: This is a simplified implementation
+        // ITAD API structure: https://docs.isthereanydeal.com/
+        const response = await fetch(
+            `${CONFIG.ITAD_API_BASE}/v1/deals/list/?key=${CONFIG.ITAD_API_KEY}&limit=${CONFIG.MAX_FETCH}&sort=price:asc`
+        );
+
+        if (!response.ok) {
+            console.warn('ITAD API failed, falling back to CheapShark');
+            return await fetchDealsFromCheapShark();
+        }
+
+        const data = await response.json();
+
+        // Transform ITAD data to match our format
+        const enrichedDeals = data.data.list.map(deal => ({
+            dealID: deal.id,
+            title: deal.title,
+            storeID: deal.shop.id,
+            storeName: deal.shop.name,
+            salePrice: parseFloat(deal.price.amount),
+            normalPrice: parseFloat(deal.price.regular),
+            savings: ((deal.price.regular - deal.price.amount) / deal.price.regular * 100),
+            dealRating: 0, // ITAD doesn't have deal rating
+            thumb: deal.image || '',
+            savingsAmount: deal.price.regular - deal.price.amount,
+            steamAppID: null,
+            genres: [],
+            url: deal.url
+        })).filter(deal => deal.savings > 0);
+
+        fetchGenresForDeals(enrichedDeals);
+
+        state.cache.data = enrichedDeals;
+        state.cache.timestamp = Date.now();
+
+        return enrichedDeals;
+    } catch (error) {
+        console.error('ITAD fetch failed:', error);
+        return await fetchDealsFromCheapShark();
+    }
+}
+
+// Fetch game popularity from RAWG API (NEW - Real popularity scores!)
+async function fetchGamePopularityFromRAWG(gameName) {
+    if (!CONFIG.USE_RAWG || CONFIG.RAWG_API_KEY === 'YOUR_RAWG_API_KEY_HERE') {
+        return null;
+    }
+
+    try {
+        const response = await fetch(
+            `${CONFIG.RAWG_API_BASE}/games?key=${CONFIG.RAWG_API_KEY}&search=${encodeURIComponent(gameName)}&page_size=1`
+        );
+
+        if (!response.ok) return null;
+
+        const data = await response.json();
+        if (data.results && data.results.length > 0) {
+            const game = data.results[0];
+            return {
+                rating: game.rating || 0, // 0-5 scale
+                ratingCount: game.ratings_count || 0,
+                metacritic: game.metacritic || 0, // 0-100
+                added: game.added || 0, // Number of users who added it
+                playtime: game.playtime || 0, // Average hours played
+                popularityScore: calculateRAWGPopularity(game)
+            };
+        }
+
+        return null;
+    } catch (error) {
+        console.error('RAWG fetch error:', error);
+        return null;
+    }
+}
+
+// Calculate popularity score from RAWG data
+function calculateRAWGPopularity(game) {
+    // Weighted formula: Rating * RatingCount + Metacritic + Added users
+    const ratingScore = (game.rating || 0) * Math.log10((game.ratings_count || 1) + 1) * 10;
+    const metacriticScore = (game.metacritic || 0) / 2; // Scale down from 100
+    const communityScore = Math.log10((game.added || 1) + 1) * 5;
+
+    return Math.min(100, ratingScore + metacriticScore + communityScore);
 }
 
 // ===== Genre Detection =====
