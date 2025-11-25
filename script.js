@@ -102,7 +102,7 @@ let state = {
         genre: savedFilters?.genre || 'all',
         discount: savedFilters?.discount || 0,
         maxPrice: savedFilters?.maxPrice || 100,
-        sort: savedFilters?.sort || 'Deal Rating'
+        sort: savedFilters?.sort || 'Most Popular'
     },
     isLoading: false,
     cache: {
@@ -522,7 +522,19 @@ function sortDeals(deals, sortBy) {
     const sorted = [...deals];
 
     switch (sortBy) {
-        case 'Deal Rating':
+        case 'Most Popular':
+            return sorted.sort((a, b) => {
+                // Sort by popularity score first
+                const scoreA = getGamePopularityScore(a.title);
+                const scoreB = getGamePopularityScore(b.title);
+
+                if (scoreB !== scoreA) {
+                    return scoreB - scoreA;
+                }
+                // If same popularity, sort by deal rating
+                return b.dealRating - a.dealRating;
+            });
+        case 'Best Deals':
             return sorted.sort((a, b) => b.dealRating - a.dealRating);
         case 'Savings':
             return sorted.sort((a, b) => b.savings - a.savings);
@@ -755,7 +767,7 @@ function clearAllFilters() {
     state.filters.genre = 'all';
     state.filters.discount = 0;
     state.filters.maxPrice = 100;
-    state.filters.sort = 'Deal Rating';
+    state.filters.sort = 'Most Popular';
 
     // Reset all UI elements
     elements.searchInput.value = '';
@@ -763,7 +775,7 @@ function clearAllFilters() {
     elements.genreFilter.value = 'all';
     elements.discountFilter.value = '0';
     elements.priceFilter.value = '100';
-    elements.sortFilter.value = 'Deal Rating';
+    elements.sortFilter.value = 'Most Popular';
 
     updateFiltersAndRender();
 }
@@ -882,43 +894,69 @@ function updateStatistics() {
 }
 
 // ===== Most Popular Games =====
-const POPULAR_GAMES = [
-    'Grand Theft Auto', 'GTA V', 'GTA 5', 'GTA VI', 'GTA 6',
-    'Counter-Strike', 'CS:GO', 'CS2', 'Counter Strike',
-    'PUBG', 'PlayerUnknown',
-    'Valorant',
-    'FC 24', 'FC 25', 'FIFA',
-    'Call of Duty', 'COD', 'Modern Warfare', 'Warzone',
-    'Apex Legends',
-    'Fortnite',
-    'Minecraft',
-    'Elden Ring',
-    'Red Dead Redemption',
-    'Cyberpunk 2077',
-    'The Witcher',
-    'Dark Souls',
-    'League of Legends',
-    'Dota 2',
-    'Overwatch',
-    'Destiny 2',
-    'Rainbow Six Siege',
-    'Rocket League',
-    'Battlefield',
-    'Resident Evil',
-    'God of War',
-    'Spider-Man',
-    'Hogwarts Legacy',
-    'Baldur\'s Gate',
-    'Starfield',
-    'Palworld',
-    'Helldivers'
-];
+// Ranked by real-world popularity (Steam charts, Twitch, general awareness)
+const POPULAR_GAMES_RANKED = {
+    // Tier 1: Most popular (100+ points)
+    'Counter-Strike': 100, 'CS:GO': 100, 'CS2': 100, 'Counter Strike': 100,
+    'Grand Theft Auto': 95, 'GTA V': 95, 'GTA 5': 95, 'GTA VI': 95, 'GTA 6': 95,
+    'Minecraft': 95,
+    'Fortnite': 90,
+    'Valorant': 90,
+    'League of Legends': 90,
+    'Dota 2': 85,
+    'PUBG': 85, 'PlayerUnknown': 85,
+    'Apex Legends': 85,
+    'Call of Duty': 85, 'COD': 85, 'Modern Warfare': 85, 'Warzone': 85,
+
+    // Tier 2: Very popular (70-84 points)
+    'Elden Ring': 80,
+    'Red Dead Redemption': 80,
+    'The Witcher': 80,
+    'Cyberpunk 2077': 75,
+    'Overwatch': 75,
+    'Rainbow Six Siege': 75,
+    'Rocket League': 75,
+    'Destiny 2': 75,
+    'Battlefield': 75,
+    'FC 24': 75, 'FC 25': 75, 'FIFA': 75,
+
+    // Tier 3: Popular (50-69 points)
+    'Hogwarts Legacy': 70,
+    'Baldur\'s Gate': 70,
+    'Dark Souls': 70,
+    'Resident Evil': 65,
+    'God of War': 65,
+    'Spider-Man': 65,
+    'Starfield': 60,
+    'Palworld': 60,
+    'Helldivers': 60,
+    'Terraria': 55,
+    'Stardew Valley': 55,
+    'Rust': 55,
+    'ARK': 55,
+    'Dead by Daylight': 55,
+    'Monster Hunter': 55,
+    'Final Fantasy': 55,
+    'Fallout': 50,
+    'Skyrim': 50,
+    'Elder Scrolls': 50
+};
+
+function getGamePopularityScore(title) {
+    const titleLower = title.toLowerCase();
+    let maxScore = 0;
+
+    for (const [gameName, score] of Object.entries(POPULAR_GAMES_RANKED)) {
+        if (titleLower.includes(gameName.toLowerCase())) {
+            maxScore = Math.max(maxScore, score);
+        }
+    }
+
+    return maxScore;
+}
 
 function isPopularGame(title) {
-    const titleLower = title.toLowerCase();
-    return POPULAR_GAMES.some(popularGame =>
-        titleLower.includes(popularGame.toLowerCase())
-    );
+    return getGamePopularityScore(title) > 0;
 }
 
 function showMostPopularGames() {
