@@ -3,8 +3,8 @@ const CONFIG = {
     // API Keys - Get yours free at:
     // ITAD: https://isthereanydeal.com/dev/app/
     // RAWG: https://rawg.io/apidocs
-    ITAD_API_KEY: 'YOUR_ITAD_API_KEY_HERE', // Replace with your key
-    RAWG_API_KEY: 'YOUR_RAWG_API_KEY_HERE', // Replace with your key
+    ITAD_API_KEY: '99e0e63eb8ed51b7f92fde653aa38ffdead5be40',
+    RAWG_API_KEY: '308ac68475a64329894c318bc1f998ae',
 
     // API Endpoints
     ITAD_API_BASE: 'https://api.isthereanydeal.com',
@@ -15,8 +15,8 @@ const CONFIG = {
     INITIAL_LOAD: 60,  // Show 60 initially
     LOAD_MORE_COUNT: 60,  // Load 60 more each time
     MAX_FETCH: 1000,  // Fetch up to 1000 deals
-    USE_ITAD: false, // Set to true once you have API key
-    USE_RAWG: false  // Set to true once you have API key
+    USE_ITAD: true, // ✅ ENABLED - Using ITAD for more deals!
+    USE_RAWG: true  // ✅ ENABLED - Using RAWG for real popularity!
 };
 
 // Store names mapping (comprehensive list of legitimate PC game stores)
