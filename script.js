@@ -15,7 +15,7 @@ const CONFIG = {
     INITIAL_LOAD: 60,  // Show 60 initially
     LOAD_MORE_COUNT: 60,  // Load 60 more each time
     MAX_FETCH: 1000,  // Fetch up to 1000 deals
-    USE_ITAD: true, // ✅ ENABLED - Using ITAD for more deals!
+    USE_ITAD: false, // ❌ DISABLED - ITAD has CORS issues (requires backend)
     USE_RAWG: true  // ✅ ENABLED - Using RAWG for real popularity!
 };
 
