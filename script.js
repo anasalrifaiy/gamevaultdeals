@@ -11,11 +11,16 @@ const CONFIG = {
     RAWG_API_BASE: 'https://api.rawg.io/api',
     CHEAPSHARK_API_BASE: 'https://www.cheapshark.com/api/1.0', // Fallback
 
+    // Cloudflare Worker (CORS proxy for ITAD)
+    // Deploy cloudflare-worker.js and add your worker URL here
+    // See CLOUDFLARE_SETUP.md for instructions
+    WORKER_URL: 'YOUR_WORKER_URL_HERE', // e.g., 'https://itad-proxy.YOUR-USERNAME.workers.dev'
+
     CACHE_DURATION: 15 * 60 * 1000, // 15 minutes
     INITIAL_LOAD: 60,  // Show 60 initially
     LOAD_MORE_COUNT: 60,  // Load 60 more each time
     MAX_FETCH: 1000,  // Fetch up to 1000 deals
-    USE_ITAD: false, // ❌ DISABLED - ITAD has CORS issues (requires backend)
+    USE_ITAD: false, // ❌ DISABLED - Enable after deploying Cloudflare Worker (see CLOUDFLARE_SETUP.md)
     USE_RAWG: true  // ✅ ENABLED - Using RAWG for real popularity!
 };
 
@@ -210,14 +215,21 @@ async function fetchDealsFromCheapShark() {
 // Fetch deals from IsThereAnyDeal (NEW - More deals!)
 async function fetchDealsFromITAD() {
     try {
-        // Note: This is a simplified implementation
-        // ITAD API structure: https://docs.isthereanydeal.com/
+        // Check if worker URL is configured
+        if (!CONFIG.WORKER_URL || CONFIG.WORKER_URL === 'YOUR_WORKER_URL_HERE') {
+            console.warn('Cloudflare Worker not configured, falling back to CheapShark');
+            console.info('See CLOUDFLARE_SETUP.md to set up the worker');
+            return await fetchDealsFromCheapShark();
+        }
+
+        // Call Cloudflare Worker (proxy handles API key server-side)
+        // No API key needed in frontend - worker adds it securely!
         const response = await fetch(
-            `${CONFIG.ITAD_API_BASE}/v1/deals/list/?key=${CONFIG.ITAD_API_KEY}&limit=${CONFIG.MAX_FETCH}&sort=price:asc`
+            `${CONFIG.WORKER_URL}?endpoint=/v1/deals/list/&limit=${CONFIG.MAX_FETCH}&sort=price:asc`
         );
 
         if (!response.ok) {
-            console.warn('ITAD API failed, falling back to CheapShark');
+            console.warn('ITAD Worker failed, falling back to CheapShark');
             return await fetchDealsFromCheapShark();
         }
 
