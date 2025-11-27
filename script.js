@@ -14,13 +14,13 @@ const CONFIG = {
     // Cloudflare Worker (CORS proxy for ITAD)
     // Deploy cloudflare-worker.js and add your worker URL here
     // See CLOUDFLARE_SETUP.md for instructions
-    WORKER_URL: 'gamevault-itad-proxy.anasalrifai90.workers.dev', // e.g., 'https://itad-proxy.YOUR-USERNAME.workers.dev'
+    WORKER_URL: 'https://gamevault-itad-proxy.anasalrifai90.workers.dev', // ✅ CONFIGURED!
 
     CACHE_DURATION: 15 * 60 * 1000, // 15 minutes
     INITIAL_LOAD: 60,  // Show 60 initially
     LOAD_MORE_COUNT: 60,  // Load 60 more each time
     MAX_FETCH: 1000,  // Fetch up to 1000 deals
-    USE_ITAD: true, // ❌ DISABLED - Enable after deploying Cloudflare Worker (see CLOUDFLARE_SETUP.md)
+    USE_ITAD: true, // ✅ ENABLED - Using Cloudflare Worker proxy!
     USE_RAWG: true  // ✅ ENABLED - Using RAWG for real popularity!
 };
 
