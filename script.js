@@ -19,7 +19,7 @@ const CONFIG = {
     CACHE_DURATION: 15 * 60 * 1000, // 15 minutes
     INITIAL_LOAD: 60,  // Show 60 initially
     LOAD_MORE_COUNT: 60,  // Load 60 more each time
-    MAX_FETCH: 1000,  // Fetch up to 1000 deals
+    MAX_FETCH: 200,  // ⚡ OPTIMIZED: Reduced from 1000 to 200 for faster loading
     USE_ITAD: false, // ❌ DISABLED - ITAD API requires OAuth (not simple API key)
     USE_RAWG: true  // ✅ ENABLED - Using RAWG for real popularity!
 };
