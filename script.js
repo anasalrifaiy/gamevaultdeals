@@ -1,27 +1,16 @@
 // ===== Configuration =====
 const CONFIG = {
-    // API Keys - Get yours free at:
-    // ITAD: https://isthereanydeal.com/dev/app/
-    // RAWG: https://rawg.io/apidocs
-    ITAD_API_KEY: '99e0e63eb8ed51b7f92fde653aa38ffdead5be40',
-    RAWG_API_KEY: '308ac68475a64329894c318bc1f998ae',
-
-    // API Endpoints
-    ITAD_API_BASE: 'https://api.isthereanydeal.com',
-    RAWG_API_BASE: 'https://api.rawg.io/api',
-    CHEAPSHARK_API_BASE: 'https://www.cheapshark.com/api/1.0', // Fallback
-
-    // Cloudflare Worker (CORS proxy for ITAD)
-    // Deploy cloudflare-worker.js and add your worker URL here
-    // See CLOUDFLARE_SETUP.md for instructions
-    WORKER_URL: 'https://gamevault-itad-proxy.anasalrifai90.workers.dev', // ✅ CONFIGURED!
+    // API Endpoint
+    CHEAPSHARK_API_BASE: 'https://www.cheapshark.com/api/1.0',
 
     CACHE_DURATION: 15 * 60 * 1000, // 15 minutes
     INITIAL_LOAD: 60,  // Show 60 initially
     LOAD_MORE_COUNT: 60,  // Load 60 more each time
-    MAX_FETCH: 200,  // ⚡ OPTIMIZED: Reduced from 1000 to 200 for faster loading
-    USE_ITAD: false, // ❌ DISABLED - ITAD API requires OAuth (not simple API key)
-    USE_RAWG: true  // ✅ ENABLED - Using RAWG for real popularity!
+    MAX_FETCH: 200,  // ⚡ OPTIMIZED: Fetch 200 deals for fast loading
+
+    // Offline backup
+    OFFLINE_BACKUP_KEY: 'gamevault_offline_backup', // localStorage key for offline data
+    OFFLINE_BACKUP_MAX_AGE: 7 * 24 * 60 * 60 * 1000 // 7 days
 };
 
 // Store names mapping (comprehensive list of legitimate PC game stores)
@@ -145,6 +134,80 @@ const elements = {
     loadMoreBtn: document.getElementById('loadMoreBtn')
 };
 
+// ===== Offline Backup Functions =====
+function saveOfflineBackup(deals) {
+    try {
+        const backup = {
+            deals: deals,
+            timestamp: Date.now()
+        };
+        localStorage.setItem(CONFIG.OFFLINE_BACKUP_KEY, JSON.stringify(backup));
+        console.log('✅ Offline backup saved:', deals.length, 'deals');
+    } catch (error) {
+        console.warn('Failed to save offline backup:', error);
+    }
+}
+
+function loadOfflineBackup() {
+    try {
+        const backupStr = localStorage.getItem(CONFIG.OFFLINE_BACKUP_KEY);
+        if (!backupStr) return null;
+
+        const backup = JSON.parse(backupStr);
+        const age = Date.now() - backup.timestamp;
+
+        // Check if backup is too old (7 days)
+        if (age > CONFIG.OFFLINE_BACKUP_MAX_AGE) {
+            console.warn('Offline backup is too old, discarding');
+            localStorage.removeItem(CONFIG.OFFLINE_BACKUP_KEY);
+            return null;
+        }
+
+        console.log('📦 Loaded offline backup:', backup.deals.length, 'deals');
+        return backup.deals;
+    } catch (error) {
+        console.warn('Failed to load offline backup:', error);
+        return null;
+    }
+}
+
+function showOfflineIndicator() {
+    // Remove existing indicator if any
+    hideOfflineIndicator();
+
+    // Create offline mode banner
+    const banner = document.createElement('div');
+    banner.id = 'offline-indicator';
+    banner.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        color: white;
+        padding: 12px 20px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 10000;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    `;
+    banner.innerHTML = `
+        📡 <strong>Offline Mode:</strong> Showing cached deals. You'll get fresh deals when back online.
+    `;
+
+    document.body.insertBefore(banner, document.body.firstChild);
+    document.body.style.paddingTop = '48px'; // Adjust for banner height
+}
+
+function hideOfflineIndicator() {
+    const indicator = document.getElementById('offline-indicator');
+    if (indicator) {
+        indicator.remove();
+        document.body.style.paddingTop = '0';
+    }
+}
+
 // ===== API Functions =====
 async function fetchDeals() {
     // Check cache first
@@ -155,11 +218,31 @@ async function fetchDeals() {
         }
     }
 
-    // Use ITAD if enabled and has API key, otherwise use CheapShark
-    if (CONFIG.USE_ITAD && CONFIG.ITAD_API_KEY !== 'YOUR_ITAD_API_KEY_HERE') {
-        return await fetchDealsFromITAD();
-    } else {
-        return await fetchDealsFromCheapShark();
+    try {
+        // Fetch fresh deals from CheapShark
+        const deals = await fetchDealsFromCheapShark();
+
+        // Save to offline backup (localStorage)
+        saveOfflineBackup(deals);
+
+        // Hide offline mode indicator if showing
+        hideOfflineIndicator();
+
+        return deals;
+    } catch (error) {
+        console.error('Failed to fetch fresh deals, trying offline backup:', error);
+
+        // Try to load from offline backup
+        const offlineDeals = loadOfflineBackup();
+
+        if (offlineDeals && offlineDeals.length > 0) {
+            // Show offline mode indicator
+            showOfflineIndicator();
+            return offlineDeals;
+        }
+
+        // No backup available, throw error
+        throw new Error('Unable to load deals - no internet connection and no offline backup available');
     }
 }
 
@@ -210,101 +293,6 @@ async function fetchDealsFromCheapShark() {
     } catch (error) {
         throw error;
     }
-}
-
-// Fetch deals from IsThereAnyDeal (NEW - More deals!)
-async function fetchDealsFromITAD() {
-    try {
-        // Check if worker URL is configured
-        if (!CONFIG.WORKER_URL || CONFIG.WORKER_URL === 'YOUR_WORKER_URL_HERE') {
-            console.warn('Cloudflare Worker not configured, falling back to CheapShark');
-            console.info('See CLOUDFLARE_SETUP.md to set up the worker');
-            return await fetchDealsFromCheapShark();
-        }
-
-        // Call Cloudflare Worker (proxy handles API key server-side)
-        // No API key needed in frontend - worker adds it securely!
-        const response = await fetch(
-            `${CONFIG.WORKER_URL}?endpoint=/v1/deals/list/&limit=${CONFIG.MAX_FETCH}&sort=price:asc`
-        );
-
-        if (!response.ok) {
-            console.warn('ITAD Worker failed, falling back to CheapShark');
-            return await fetchDealsFromCheapShark();
-        }
-
-        const data = await response.json();
-
-        // Transform ITAD data to match our format
-        const enrichedDeals = data.data.list.map(deal => ({
-            dealID: deal.id,
-            title: deal.title,
-            storeID: deal.shop.id,
-            storeName: deal.shop.name,
-            salePrice: parseFloat(deal.price.amount),
-            normalPrice: parseFloat(deal.price.regular),
-            savings: ((deal.price.regular - deal.price.amount) / deal.price.regular * 100),
-            dealRating: 0, // ITAD doesn't have deal rating
-            thumb: deal.image || '',
-            savingsAmount: deal.price.regular - deal.price.amount,
-            steamAppID: null,
-            genres: [],
-            url: deal.url
-        })).filter(deal => deal.savings > 0);
-
-        fetchGenresForDeals(enrichedDeals);
-
-        state.cache.data = enrichedDeals;
-        state.cache.timestamp = Date.now();
-
-        return enrichedDeals;
-    } catch (error) {
-        console.error('ITAD fetch failed:', error);
-        return await fetchDealsFromCheapShark();
-    }
-}
-
-// Fetch game popularity from RAWG API (NEW - Real popularity scores!)
-async function fetchGamePopularityFromRAWG(gameName) {
-    if (!CONFIG.USE_RAWG || CONFIG.RAWG_API_KEY === 'YOUR_RAWG_API_KEY_HERE') {
-        return null;
-    }
-
-    try {
-        const response = await fetch(
-            `${CONFIG.RAWG_API_BASE}/games?key=${CONFIG.RAWG_API_KEY}&search=${encodeURIComponent(gameName)}&page_size=1`
-        );
-
-        if (!response.ok) return null;
-
-        const data = await response.json();
-        if (data.results && data.results.length > 0) {
-            const game = data.results[0];
-            return {
-                rating: game.rating || 0, // 0-5 scale
-                ratingCount: game.ratings_count || 0,
-                metacritic: game.metacritic || 0, // 0-100
-                added: game.added || 0, // Number of users who added it
-                playtime: game.playtime || 0, // Average hours played
-                popularityScore: calculateRAWGPopularity(game)
-            };
-        }
-
-        return null;
-    } catch (error) {
-        console.error('RAWG fetch error:', error);
-        return null;
-    }
-}
-
-// Calculate popularity score from RAWG data
-function calculateRAWGPopularity(game) {
-    // Weighted formula: Rating * RatingCount + Metacritic + Added users
-    const ratingScore = (game.rating || 0) * Math.log10((game.ratings_count || 1) + 1) * 10;
-    const metacriticScore = (game.metacritic || 0) / 2; // Scale down from 100
-    const communityScore = Math.log10((game.added || 1) + 1) * 5;
-
-    return Math.min(100, ratingScore + metacriticScore + communityScore);
 }
 
 // ===== Genre Detection =====
