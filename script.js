@@ -102,6 +102,7 @@ let state = {
     allDeals: [],
     filteredDeals: [],
     displayedCount: CONFIG.INITIAL_LOAD,  // Track how many to show
+    popularGameDealIDs: [],  // Track dealIDs shown in "Most Popular" section to avoid duplicates
     filters: {
         search: '',
         store: savedFilters?.store || 'all',
@@ -508,6 +509,11 @@ function deduplicateDeals(deals) {
 
 function applyFilters() {
     let filtered = [...state.allDeals];
+
+    // Exclude games already shown in "Most Popular" section
+    if (state.popularGameDealIDs.length > 0) {
+        filtered = filtered.filter(deal => !state.popularGameDealIDs.includes(deal.dealID));
+    }
 
     // Search filter
     if (state.filters.search) {
@@ -1068,7 +1074,13 @@ function showMostPopularGames() {
         })
         .slice(0, 6); // Show up to 6 popular games
 
-    if (popularDeals.length === 0) return;
+    if (popularDeals.length === 0) {
+        state.popularGameDealIDs = [];
+        return;
+    }
+
+    // Store dealIDs to exclude from main list
+    state.popularGameDealIDs = popularDeals.map(deal => deal.dealID);
 
     const popularGamesSection = document.getElementById('popularGames');
     const popularGamesGrid = document.getElementById('popularGamesGrid');
