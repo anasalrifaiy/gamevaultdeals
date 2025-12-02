@@ -6,7 +6,7 @@ const CONFIG = {
     CACHE_DURATION: 15 * 60 * 1000, // 15 minutes
     INITIAL_LOAD: 60,  // Show 60 initially
     LOAD_MORE_COUNT: 60,  // Load 60 more each time
-    MAX_FETCH: 300,  // ⚡ Fetch 300 deals - optimized for speed
+    MAX_FETCH: 200,  // ⚡ Fetch 200 deals - fast loading, users can load more if needed
 
     // Offline backup
     OFFLINE_BACKUP_KEY: 'gamevault_offline_backup', // localStorage key for offline data
