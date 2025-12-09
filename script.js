@@ -710,12 +710,37 @@ function getPlatformIcon(storeName) {
     return icons[storeName] || '🎮';
 }
 
+// Detect actual platform/launcher for the game
+function detectPlatform(deal) {
+    // Direct platform stores (store = platform)
+    const directPlatforms = ['Steam', 'GOG', 'Epic Games', 'EA App', 'Ubisoft Connect', 'Microsoft Store'];
+
+    if (directPlatforms.includes(deal.storeName)) {
+        return { name: deal.storeName, icon: getPlatformIcon(deal.storeName) };
+    }
+
+    // Third-party stores - check if it's a Steam key
+    if (deal.steamAppID && deal.steamAppID !== null && deal.steamAppID !== 'null') {
+        return { name: 'Steam', icon: '🎮', note: 'via ' + deal.storeName };
+    }
+
+    // If unknown but from known third-party stores, likely Steam
+    const thirdPartyStores = ['GreenManGaming', 'Fanatical', 'Humble Store', 'Humble Bundle', 'GamersGate',
+                              'Gamesplanet', 'GameBillet', 'WinGameStore', 'IndieGala', 'Direct2Drive'];
+    if (thirdPartyStores.includes(deal.storeName)) {
+        return { name: 'Steam', icon: '🎮', note: 'via ' + deal.storeName };
+    }
+
+    // Fallback to store name
+    return { name: deal.storeName, icon: getPlatformIcon(deal.storeName) };
+}
+
 function createGameCard(deal) {
     const discountPercent = Math.round(deal.savings);
     const dealRatingStars = '⭐'.repeat(Math.min(Math.round(deal.dealRating / 2), 5));
 
-    // Get platform icon
-    const platformIcon = getPlatformIcon(deal.storeName);
+    // Get actual platform (not just store)
+    const platform = detectPlatform(deal);
 
     // Sort alternative stores by price
     const altStores = deal.alternativeStores || [];
@@ -732,11 +757,11 @@ function createGameCard(deal) {
                         loading="lazy"
                         onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
                     />
-                    <div class="platform-badge">${platformIcon} ${deal.storeName}</div>
+                    <div class="platform-badge">${platform.icon} ${platform.name}</div>
                 </div>
                 <div class="game-content">
                     <h3 class="game-title">${escapeHtml(deal.title)}</h3>
-                    <span class="game-store"><span style="color: #4CAF50; font-size: 0.85em;">⭐ Best Price</span></span>
+                    <span class="game-store">${platform.note ? `📍 ${platform.note}` : ''} <span style="color: #4CAF50; font-size: 0.85em;">⭐ Best Price</span></span>
 
                     <div class="game-pricing">
                         <div class="game-discount">-${discountPercent}%</div>
