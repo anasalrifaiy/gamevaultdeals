@@ -685,9 +685,37 @@ function renderGames(deals) {
     }
 }
 
+// Get platform icon based on store name
+function getPlatformIcon(storeName) {
+    const icons = {
+        'Steam': '🎮',
+        'GOG': '🎯',
+        'Epic Games': '🎮',
+        'Humble Store': '🎁',
+        'Humble Bundle': '🎁',
+        'GreenManGaming': '🟢',
+        'Fanatical': '⚡',
+        'GamersGate': '🎪',
+        'Gamesplanet': '🌍',
+        'Ubisoft Connect': '🔵',
+        'EA App': '🎮',
+        'Microsoft Store': '🪟',
+        'GameBillet': '🎫',
+        'WinGameStore': '🏆',
+        'Direct2Drive': '💿',
+        'IndieGala': '🎨',
+        'Amazon': '📦'
+    };
+
+    return icons[storeName] || '🎮';
+}
+
 function createGameCard(deal) {
     const discountPercent = Math.round(deal.savings);
     const dealRatingStars = '⭐'.repeat(Math.min(Math.round(deal.dealRating / 2), 5));
+
+    // Get platform icon
+    const platformIcon = getPlatformIcon(deal.storeName);
 
     // Sort alternative stores by price
     const altStores = deal.alternativeStores || [];
@@ -696,16 +724,19 @@ function createGameCard(deal) {
     return `
         <div class="game-card">
             <div onclick="openDeal('${deal.dealID}')" style="cursor: pointer;">
-                <img
-                    src="${deal.thumb}"
-                    alt="${deal.title}"
-                    class="game-image"
-                    loading="lazy"
-                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
-                />
+                <div style="position: relative;">
+                    <img
+                        src="${deal.thumb}"
+                        alt="${deal.title}"
+                        class="game-image"
+                        loading="lazy"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
+                    />
+                    <div class="platform-badge">${platformIcon} ${deal.storeName}</div>
+                </div>
                 <div class="game-content">
                     <h3 class="game-title">${escapeHtml(deal.title)}</h3>
-                    <span class="game-store">${deal.storeName} <span style="color: #4CAF50; font-size: 0.85em;">⭐ Best Price</span></span>
+                    <span class="game-store"><span style="color: #4CAF50; font-size: 0.85em;">⭐ Best Price</span></span>
 
                     <div class="game-pricing">
                         <div class="game-discount">-${discountPercent}%</div>

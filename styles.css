@@ -678,6 +678,25 @@ body {
     background: linear-gradient(135deg, #1A1A3E 0%, #2D2D5F 100%);
 }
 
+.platform-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(26, 26, 62, 0.95);
+    backdrop-filter: blur(10px);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid rgba(108, 99, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
 .game-content {
     padding: var(--spacing-md);
 }
