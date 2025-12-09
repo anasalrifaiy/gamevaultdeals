@@ -1143,19 +1143,23 @@ function showMostPopularGames() {
 
     popularGamesGrid.innerHTML = popularDeals.map(deal => {
         const discountPercent = Math.round(deal.savings);
+        const platform = detectPlatform(deal); // Use platform detection
         return `
             <div class="popular-game-card" onclick="openDeal('${deal.dealID}')" style="cursor: pointer;">
                 <div class="popular-badge">🔥 POPULAR</div>
-                <img
-                    src="${deal.thumb}"
-                    alt="${escapeHtml(deal.title)}"
-                    class="popular-game-image"
-                    loading="eager"
-                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
-                />
+                <div style="position: relative;">
+                    <img
+                        src="${deal.thumb}"
+                        alt="${escapeHtml(deal.title)}"
+                        class="popular-game-image"
+                        loading="eager"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 460 215%22><rect fill=%22%231A1A3E%22 width=%22460%22 height=%22215%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23B8B8D4%22 font-family=%22Arial%22 font-size=%2218%22>Game Image</text></svg>'"
+                    />
+                    <div class="platform-badge">${platform.icon} ${platform.name}</div>
+                </div>
                 <div class="popular-game-content">
                     <h4 class="popular-game-title">${escapeHtml(deal.title)}</h4>
-                    <span class="popular-game-store">📍 ${deal.storeName}</span>
+                    <span class="popular-game-store">${platform.note ? `📍 ${platform.note}` : ''}</span>
 
                     <div class="popular-game-pricing">
                         <div class="popular-game-discount">-${discountPercent}%</div>
