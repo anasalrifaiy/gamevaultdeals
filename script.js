@@ -73,6 +73,7 @@ function saveFilters(filters) {
     try {
         const toSave = {
             store: filters.store,
+            platform: filters.platform,
             genre: filters.genre,
             discount: filters.discount,
             maxPrice: filters.maxPrice,
@@ -89,6 +90,7 @@ function saveFilters(filters) {
 function restoreSavedFiltersToUI() {
     if (savedFilters) {
         if (savedFilters.store) elements.storeFilter.value = savedFilters.store;
+        if (savedFilters.platform) elements.platformFilter.value = savedFilters.platform;
         if (savedFilters.genre) elements.genreFilter.value = savedFilters.genre;
         if (savedFilters.discount !== undefined) elements.discountFilter.value = String(savedFilters.discount);
         if (savedFilters.maxPrice !== undefined) elements.priceFilter.value = String(savedFilters.maxPrice);
@@ -106,6 +108,7 @@ let state = {
     filters: {
         search: '',
         store: savedFilters?.store || 'all',
+        platform: savedFilters?.platform || 'all',
         genre: savedFilters?.genre || 'all',
         discount: savedFilters?.discount || 0,
         maxPrice: savedFilters?.maxPrice || 100,
@@ -127,6 +130,7 @@ const elements = {
     resultCount: document.getElementById('resultCount'),
     searchInput: document.getElementById('searchInput'),
     storeFilter: document.getElementById('storeFilter'),
+    platformFilter: document.getElementById('platformFilter'),
     genreFilter: document.getElementById('genreFilter'),
     discountFilter: document.getElementById('discountFilter'),
     sortFilter: document.getElementById('sortFilter'),
@@ -528,6 +532,14 @@ function applyFilters() {
         filtered = filtered.filter(deal => String(deal.storeID) === String(state.filters.store));
     }
 
+    // Platform filter
+    if (state.filters.platform !== 'all') {
+        filtered = filtered.filter(deal => {
+            const platform = detectPlatform(deal);
+            return platform.name === state.filters.platform;
+        });
+    }
+
     // Genre filter
     if (state.filters.genre !== 'all') {
         filtered = filtered.filter(deal =>
@@ -582,6 +594,39 @@ function updateStoreFilter() {
     // Restore selection if still valid
     if (currentValue !== 'all' && storeCounts[currentValue]) {
         elements.storeFilter.value = currentValue;
+    }
+}
+
+// ===== Dynamic Platform Filter =====
+function updatePlatformFilter() {
+    // Count deals per platform
+    const platformCounts = {};
+    state.allDeals.forEach(deal => {
+        const platform = detectPlatform(deal);
+        const platformName = platform.name;
+        platformCounts[platformName] = (platformCounts[platformName] || 0) + 1;
+    });
+
+    // Get currently selected value
+    const currentValue = elements.platformFilter.value;
+
+    // Rebuild dropdown with only platforms that have deals
+    let options = '<option value="all">All Platforms</option>';
+
+    // Sort platforms by deal count (descending)
+    const sortedPlatforms = Object.entries(platformCounts)
+        .sort((a, b) => b[1] - a[1]);
+
+    sortedPlatforms.forEach(([platformName, count]) => {
+        const icon = getPlatformIcon(platformName);
+        options += `<option value="${platformName}">${icon} ${platformName} (${count})</option>`;
+    });
+
+    elements.platformFilter.innerHTML = options;
+
+    // Restore selection if still valid
+    if (currentValue !== 'all' && platformCounts[currentValue]) {
+        elements.platformFilter.value = currentValue;
     }
 }
 
@@ -1002,6 +1047,12 @@ function setupEventListeners() {
         updateFiltersAndRender();
     });
 
+    // Platform filter
+    elements.platformFilter.addEventListener('change', (e) => {
+        state.filters.platform = e.target.value;
+        updateFiltersAndRender();
+    });
+
     // Genre filter
     elements.genreFilter.addEventListener('change', (e) => {
         state.filters.genre = e.target.value;
@@ -1191,6 +1242,9 @@ async function init() {
         // Update store filter with available stores
         updateStoreFilter();
 
+        // Update platform filter with available platforms
+        updatePlatformFilter();
+
         // Update genre filter (populated by keyword detection)
         updateGenreFilter();
 
@@ -1256,6 +1310,7 @@ async function autoRefreshDeals() {
 
             // Update everything
             updateStoreFilter();
+            updatePlatformFilter();
             updateGenreFilter();
             updateStatistics();
             showMostPopularGames();
