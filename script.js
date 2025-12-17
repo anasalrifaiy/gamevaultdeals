@@ -147,9 +147,9 @@ function saveOfflineBackup(deals) {
             timestamp: Date.now()
         };
         localStorage.setItem(CONFIG.OFFLINE_BACKUP_KEY, JSON.stringify(backup));
-        console.log('✅ Offline backup saved:', deals.length, 'deals');
+        // Offline backup saved silently
     } catch (error) {
-        console.warn('Failed to save offline backup:', error);
+        // Failed to save offline backup (silent)
     }
 }
 
@@ -163,15 +163,15 @@ function loadOfflineBackup() {
 
         // Check if backup is too old (7 days)
         if (age > CONFIG.OFFLINE_BACKUP_MAX_AGE) {
-            console.warn('Offline backup is too old, discarding');
+            // Backup too old, discarding silently
             localStorage.removeItem(CONFIG.OFFLINE_BACKUP_KEY);
             return null;
         }
 
-        console.log('📦 Loaded offline backup:', backup.deals.length, 'deals');
+        // Loaded offline backup silently
         return backup.deals;
     } catch (error) {
-        console.warn('Failed to load offline backup:', error);
+        // Failed to load offline backup (silent)
         return null;
     }
 }
@@ -1295,7 +1295,7 @@ let refreshInterval = null;
 
 async function autoRefreshDeals() {
     try {
-        console.log('Auto-refreshing deals...');
+        // Auto-refreshing deals silently
 
         // Save current scroll position
         const scrollPosition = window.pageYOffset;
@@ -1352,14 +1352,14 @@ function showUpdateNotification() {
 function startAutoRefresh() {
     // Refresh every 15 minutes (900000 milliseconds)
     refreshInterval = setInterval(autoRefreshDeals, 900000);
-    console.log('Auto-refresh started: Updates every 15 minutes');
+    // Auto-refresh started silently
 }
 
 function stopAutoRefresh() {
     if (refreshInterval) {
         clearInterval(refreshInterval);
         refreshInterval = null;
-        console.log('Auto-refresh stopped');
+        // Auto-refresh stopped silently
     }
 }
 
